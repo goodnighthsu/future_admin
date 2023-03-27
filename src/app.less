@@ -1,0 +1,76 @@
+.cell {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.cell_item {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    align-items: center;
+}
+
+.cell_item + .cell_item {
+    margin-left: 20px;
+}
+
+.cell_title {
+    flex: 0 0 60px;
+    margin-right: 8px;
+    text-align: right;
+    white-space: nowrap;
+
+    font-weight: bold;
+}
+
+.model_footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+
+    border-top: solid 1px rgba(0, 0, 0, 0.06);
+    padding-top: 20px;
+}
+
+.need {
+    display: inline-block;
+}
+
+.need::before {
+    margin-left: -9px;
+    padding-right: 4px;
+    font-size: 14px;
+    color: red;
+    content: '*';
+    vertical-align: middel; 
+}
+
+// app
+.page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px - 68px - 16px);
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    
+    margin: 0 0 8px 0;
+    
+    background-color: white;
+    padding: 8px 20px;
+  
+  }
+  
+.tableWrapper {
+    background-color: white;
+    padding: 20px;
+
+    flex: 1;
+}
