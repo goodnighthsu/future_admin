@@ -2,6 +2,8 @@ import { App, cleanLocalUser } from '@/models/AppState';
 import { message, notification } from 'antd';
 import { extend } from 'umi-request';
 import { history } from '@umijs/max';
+import Setting from '../../config/Setting';
+
 
 /**
  * 请求返回的响应
@@ -88,8 +90,7 @@ request.interceptors.request.use((url, options) => {
     const token = App.instance().currentUser?.token;
     
     const config = {
-        // url: `http://localhost:8810${url}`,
-        url: `http://localhost:8200${url}`,
+        url: `${Setting.server}${url}`,
         options: {...options, interceptor: true}
     }
 
