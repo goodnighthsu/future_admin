@@ -30,5 +30,17 @@ export const requestFuture = {
         });
 
         return response?.data;
+    },
+
+    /**
+     * 取消订阅
+     */
+     unsubscribe: async (insturments: string[]) => {
+        const response: IResponse<string[]> | undefined = await request('/ctp/instrument/unsubscribe', {
+            method: 'put',
+            data: insturments
+        });
+
+        return response?.data;
     }
 }

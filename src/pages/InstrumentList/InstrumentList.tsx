@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useModel } from "@umijs/max";
 import { PageContainer } from "@ant-design/pro-components";
-import { Checkbox, Input, Table } from "antd";
+import { Checkbox, Input, message, Table } from "antd";
 import styles from './InstrumentList.less';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { InstrumentModel } from '@/models/InstrumentListState';
@@ -27,7 +27,7 @@ const InstrumentList:React.FC = (props) => {
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const [keyword, setKeyword] = useState<string | undefined>(undefined);
-    const [subscribeFilter, setSubscribeFilter] = useState<number | undefined>(undefined);
+    const [subscribeFilter, setSubscribeFilter] = useState<boolean | undefined>(undefined);
     // 当前选择的合约
     const [selecteds, setSelecteds] = useState<string[]>([]);
 
@@ -36,7 +36,11 @@ const InstrumentList:React.FC = (props) => {
     // methods
     const load = async (keyword?: string, subscribeFilter?: boolean, page?: number, pageSize?: number) => {
         setLoading(true);
-        const response = await requestFuture.instrumentList(keyword, subscribeFilter ? [subscribeFilter] : [], page, pageSize);
+        const response = await requestFuture.instrumentList(
+            keyword, 
+            subscribeFilter === undefined ? undefined : subscribeFilter ? [true] : [false], 
+            page, 
+            pageSize);
         setLoading(false);
         if (!response) {
             return;
@@ -45,7 +49,6 @@ const InstrumentList:React.FC = (props) => {
         setTotal(response.total ?? 0);
     }
 
-    // 解释下这个方法的作用
     const loadData = useCallback(
         debounce((keyword, subscribeFilter, page, pageSize) => {
                 updatePaging(page, pageSize); 
@@ -62,15 +65,39 @@ const InstrumentList:React.FC = (props) => {
      */
     const changePage = (page: number, pageSize: number) => {
         updatePaging(page, pageSize); 
-        let _subscribeFilter = undefined;
-        if (subscribeFilter !== undefined) {
-            _subscribeFilter = subscribeFilter === 1 ? true : false;
-        }
-        load(keyword, _subscribeFilter, page, pageSize);
+        load(keyword, subscribeFilter, page, pageSize);
     }
 
-    const clickSave = () => {
-        requestFuture.subscribe(selecteds);
+    /**
+     * 订阅
+     * 
+     * @param instruments
+     * @returns
+     */
+    const clickSubscribe = async (instruments: string[]) => {
+        const result = await requestFuture.subscribe(selecteds);
+        if (!result) {
+            return;
+        }
+        message.success('订阅成功');
+        setSelecteds([]);
+        load(keyword, subscribeFilter, 1, pageSize);
+    }
+
+    /**
+     * 取消订阅
+     * 
+     * @param instruments
+     * @returns
+     */
+    const clickUnsubscribe = async (instruments: string[]) => {
+        const result = await requestFuture.unsubscribe(instruments);
+        if (!result) {
+            return;
+        }
+        message.success('取消订阅成功');
+        setSelecteds([]);
+        load(keyword, subscribeFilter, 1, pageSize);
     }
 
     const columns: ColumnType<InstrumentModel>[] = [
@@ -133,28 +160,37 @@ const InstrumentList:React.FC = (props) => {
         <PageContainer>
             <div className={styles.page}>
                 <div className={styles.toolbar}>
-                    <div>
-                        <Select style={{width: '100px'}} options={[{label: '已订阅' , value: 1}, {label: '未订阅' , value: 0}]} value={subscribeFilter} 
+                    <div className={styles.toolbar_left}>
+                        <Select style={{width: '100px'}} options={[{label: '已订阅' , value: 1}, {label: '未订阅' , value: 0}]} 
+                            value={subscribeFilter !== undefined ? (subscribeFilter ? 1 : 0) : undefined} 
                             allowClear={true}
                             placeholder="订阅状态"
                             onChange={(value: number | undefined) => {
-                                setSubscribeFilter(value); 
                                 let isSubscribe = undefined;
                                 if (value !== undefined) {
                                     isSubscribe = value === 1 ? true : false;
                                 }
+                                setSubscribeFilter(isSubscribe);
                                 // 过滤订阅状态
                                 loadData(keyword, isSubscribe, 1, pageSize);
-
                             }}
                         />
+                        <Input style={{flex: '0 0 200px'}} value={keyword}  prefix={<SearchOutlined />}
+                            onChange={event => {setKeyword(event.currentTarget.value); loadData(event.currentTarget.value, subscribeFilter, 1, pageSize)}}
+                        />
                     </div>
-                    <Input style={{flex: '0 0 200px'}} value={keyword}  prefix={<SearchOutlined />}
-                        onChange={event => {setKeyword(event.currentTarget.value); loadData(event.currentTarget.value, subscribeFilter, 1, pageSize)}}
-                    />
-                    <Button type='primary' disabled={selecteds.length === 0} onClick={clickSave}>添加订阅</Button> 
-                    <Button type='primary' disabled={selecteds.length === 0} onClick={clickSave}>取消订阅</Button> 
-                    <Pagination current={page} pageSize={pageSize} total={total} onChange={changePage}/>
+                    
+                    <div className={styles.toolbar_right}>
+                        <Button type='primary' disabled={selecteds.length === 0} 
+                            onClick={ _ => clickSubscribe(selecteds)}>
+                            添加订阅
+                        </Button> 
+                        <Button type='primary' disabled={selecteds.length === 0} 
+                            onClick={ _ => clickUnsubscribe(selecteds)}>
+                            取消订阅
+                        </Button> 
+                        <Pagination current={page} pageSize={pageSize} total={total} onChange={changePage}/>
+                    </div>
                 </div>
                 <div className={styles.tableWrapper} ref={tableWrapRef}>
                     <Table className={styles.table} size="small" dataSource={datas} columns={columns} bordered rowKey={'instrumentID'} pagination={false}
