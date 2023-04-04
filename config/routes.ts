@@ -64,6 +64,11 @@ export default [
     component: './InstrumentList/InstrumentList',
   },
   {
+    name: 'Market',
+    path: '/instrument/market',
+    component: './MarketList/MarketList',
+  },
+  {
     name: 'Account Manage',
     path: '/account',
     access: 'routeFilter',
