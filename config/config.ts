@@ -7,22 +7,6 @@ import routes from './routes';
 
 const { REACT_APP_ENV } = process.env;
 
-export interface ISetting  {
-  server: string;
-}
-
-const getServer = () => {
-  if (REACT_APP_ENV === 'dev') {
-    return 'http://localhost:8080';
-  }else{
-    return 'http://localhost:8081';
-  }
-}
-
-export const setting: ISetting = {
-  server: getServer()
-}
-
 export default defineConfig({
   /**
    * @name 开启 hash 模式
@@ -30,6 +14,8 @@ export default defineConfig({
    * @doc https://umijs.org/docs/api/config#hash
    */
   hash: true,
+  base: '/future/',
+  publicPath: '/future/',
 
   /**
    * @name 兼容性设置

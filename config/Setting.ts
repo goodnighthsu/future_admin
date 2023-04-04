@@ -4,7 +4,7 @@ const server = () => {
         return 'http://localhost:8200'
     } else {
         // return new URL(window.location.href);
-        return 'http://xleon.site:8200'
+        return 'https://xleon.site/gateway'
     }
 }
 
