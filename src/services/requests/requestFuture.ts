@@ -42,5 +42,21 @@ export const requestFuture = {
         });
 
         return response?.data;
+    },
+
+    /**
+     * 获取合约交易日市场信息
+     */
+    marketList: async(instrumentId: string, tradingDay?: string, index?: number) => {
+        const response: IResponse<any> | undefined = await request('/ctp/instrument/market', {
+            method: 'get',
+            params: {
+                id: instrumentId,
+                tradingDay: tradingDay,
+                index: index,
+            }
+        });
+
+        return response?.data;
     }
 }
