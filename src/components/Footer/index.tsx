@@ -19,7 +19,6 @@ const Footer: React.FC = () => {
       copyright={`${currentYear} ${defaultMessage}`}
       links={[
         {
-          key: 'web',
           title: 'www.xleon.site',
           href: 'https://www.xleon.site',
           blankTarget: true,
@@ -27,9 +26,14 @@ const Footer: React.FC = () => {
         {
           key: 'github goodnighthsu',
           title: <GithubOutlined />,
-          href: 'https://https://github.com/goodnighthsu',
+          href: 'https://github.com/goodnighthsu',
           blankTarget: true,
-        }
+        },
+        {
+          title: '沪ICP备20025051号-1',
+          href: 'https://beian.miit.gov.cn/',
+          blankTarget: true,
+        },
       ]}
     />
   );
