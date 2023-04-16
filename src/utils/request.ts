@@ -142,6 +142,7 @@ request.interceptors.response.use( async (response, options) => {
 });
 
 const myErrorHandler = async (response: Response, options: any) => {
+
     if (options.responseType === 'blob') {
         return response;
     }
@@ -152,6 +153,7 @@ const myErrorHandler = async (response: Response, options: any) => {
     } catch (error) {
         throw { response, errorMessage:`response json parse error: ${error}`}
     }
+    console.log(response);
 
     let { code = ResposneCode.error, message = '服务异常'} = data as IResponse<any>;
     if ( code === ResposneCode.success ) {
@@ -165,9 +167,6 @@ const myErrorHandler = async (response: Response, options: any) => {
         return data;
     }
 
-    if (!message) {
-        message = '服务异常，未知错误';
-    }
 
     throw { response: response, errorMessage: message};
 }

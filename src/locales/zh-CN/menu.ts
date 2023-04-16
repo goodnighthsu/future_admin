@@ -57,4 +57,6 @@ export default {
 
   'menu.合约': '合约',
   'menu.Instrument Manage': 'Instrument Manage',
+  'menu.Market Manage': 'Market Manage',
+  'menu.Market': 'Market'
 };
