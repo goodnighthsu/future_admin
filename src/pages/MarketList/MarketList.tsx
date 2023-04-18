@@ -1,10 +1,11 @@
-import { getTimeByInstrument, IChartData } from '@/models/models/InstrumentModel';
+import { getTimeByInstrument, IChartData, IOrderBook } from '@/models/models/InstrumentModel';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { PageContainer } from '@ant-design/pro-components';
 import { DatePicker, Select } from 'antd';
 import * as ECharts from 'echarts';
+import { isArray } from 'lodash';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './MarketList.less';
 
 const MarketList: React.FC = (props) => {
@@ -16,7 +17,8 @@ const MarketList: React.FC = (props) => {
     //
     const [instrumentSelected, setInstrumentSelected] = useState<string | undefined>();
     // 合约数据
-    const [data, setData] = useState<IChartData>({ prices: [], times: [], volumes: [] });
+    // const [data, setData] = useState<IChartData>({ prices: [], times: [], volumes: [] });
+    const orderBooksRef = useRef<IOrderBook[]>([]);
 
     // MARK: - --- methods ---
     /**
@@ -47,7 +49,7 @@ const MarketList: React.FC = (props) => {
         _tradingDay?: string,
         index?: number,
     ) => {
-        const response = await requestFuture.marketList(
+        const response:IChartData | undefined = await requestFuture.marketList(
             abort,
             _data,
             interval,
@@ -69,6 +71,9 @@ const MarketList: React.FC = (props) => {
                 },
             ],
         });
+
+        // 盘口数据
+        orderBooksRef.current = response.orderBooks;
     };
 
     // MARK: - 获取交易日合约列表 method
@@ -98,6 +103,172 @@ const MarketList: React.FC = (props) => {
     const createChart = () => {
         const element = document.getElementById('eChart');
         const chart = ECharts.init(element as HTMLDivElement);
+
+        // 提示栏
+        const tooltip = {
+            show: true,
+            trigger: 'axis',
+            triggerOn: 'mousemove | click',
+            confine: true,
+            className: styles.toolTip,
+            transitionDuration: 0,
+            // 自定义tool tip
+            formatter: (params: any) => {
+                if (!isArray(params) || params.length == 0) {
+                    return [];
+                }
+
+                let obj = undefined;
+                for (let i = params.length - 1; i >= 0; i--) {
+                    const item = params[i];
+                    if (item.axisType == 'xAxis.category') {
+                        obj = item;
+                        break;
+                    }
+                }
+
+                if (obj === undefined) {
+                    return [];
+                }
+
+                // time html
+                const time = obj.axisValue;
+                const timeHtmls = [
+                    '<div style="display:flex;flex-direction:column;justify-content:space-between;width:100%">',
+                    '<div style="display:flex;flex-direction:row;justify-content:space-between"><div>Time: </div> ' +
+                    time +
+                    '</div>',
+                ];
+
+                const dataIndex = obj.dataIndex;
+
+                console.log('orderbook: ', orderBooksRef.current[dataIndex]);
+                const option = chart?.getOption() as any;
+                // console.log(chart.getOption().series[0].data[dataIndex]);
+                const series = option.series;
+                // position html
+                const payload = series[0].data[dataIndex] ?? [];
+                let positionHtmls: string[] = [];
+                if (payload.length > 0 && payload[1]) {
+                    const price = payload[1];
+                    const tickVolume = payload[2];
+                    const volume = payload[23];
+                    positionHtmls = [
+                        '<div style="height: 8px"></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask5: ' +
+                        payload[21] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[22] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask4: ' +
+                        payload[19] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[20] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask3: ' +
+                        payload[17] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[18] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask2: ' +
+                        payload[15] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[16] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask1: ' +
+                        payload[13] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[14] +
+                        '</div></div>',
+                        '<div style="height: 8px"></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid1: ' +
+                        payload[3] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[4] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid2: ' +
+                        payload[5] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[6] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid3: ' +
+                        payload[7] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[8] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid4: ' +
+                        payload[9] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[10] +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid5: ' +
+                        payload[11] +
+                        '</div><div style="text-align:right;width:80px">' +
+                        payload[12] +
+                        '</div></div>',
+                        '<div style="height: 8px"></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between">Last Price: <div style="text-align:right">' +
+                        price +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between">Tick Vol: <div style="text-align:right">' +
+                        tickVolume +
+                        '</div></div>',
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between">Volume: <div style="text-align:right">' +
+                        volume +
+                        '</div></div>',
+                    ];
+                }
+
+                // param html
+                const getParamHtml = (serie: any) => {
+                    if (serie.name == undefined) {
+                        return undefined;
+                    }
+                    if (serie.data == undefined) {
+                        return undefined;
+                    }
+                    const item = serie.data[dataIndex] ?? [];
+                    const value = item[1];
+                    if (value == undefined) {
+                        return undefined;
+                    }
+                    const paramName = serie.name;
+
+                    const html =
+                        '<div style="display:flex; flex-direction:row;justify-content:space-between">' +
+                        paramName +
+                        ': <div style="text-align:right">' +
+                        value +
+                        '</div></div>';
+
+                    return html;
+                };
+
+
+                // tool tip
+                const toolTipHtmls = [
+                    ...timeHtmls,
+                    ...positionHtmls,
+                    '</div>',
+                ];
+
+                return toolTipHtmls.join('');
+            },
+            position: (pos: any, param: any, el: any, elRect: any, size: any) => {
+                const obj = { top: 8 };
+                try {
+                    if (pos[0] < size.viewSize[0] / 2) {
+                        obj['right'] = 200;
+                    } else {
+                        obj['left'] = 30;
+                    }
+                } catch (error) {
+                    //
+                }
+
+                return obj;
+            },
+        }
         const option = {
             title: { text: '合约' },
             xAxis: [
@@ -160,6 +331,7 @@ const MarketList: React.FC = (props) => {
                     zoomOnMouseWheel: true,
                 },
             ],
+            tooltip: tooltip,
             series: [
                 {
                     // 价格
@@ -249,8 +421,9 @@ const MarketList: React.FC = (props) => {
             times: _times,
             prices: new Array(_times.length),
             volumes: new Array(_times.length),
+            orderBooks: new Array(_times.length),
         };
-        setData(_chartData);
+        // setData(_chartData);
 
         // 更新chart
         const chart = getChart();

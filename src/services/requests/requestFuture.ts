@@ -153,6 +153,30 @@ export const requestFuture = {
             // 成交量
             chartData.volumes[_index] = Number(volume) - lastVolume;
             lastVolume = Number(volume);
+
+            // 5档盘口
+            chartData.orderBooks[_index] = {
+                bidPrice1: Number(item[23]),
+                bidVolume1: Number(item[24]),
+                bidPrice2: Number(item[25]),
+                bidVolume2: Number(item[26]),
+                bidPrice3: Number(item[27]),
+                bidVolume3: Number(item[28]),
+                bidPrice4: Number(item[29]),
+                bidVolume4: Number(item[30]),
+                bidPrice5: Number(item[31]),
+                bidVolume5: Number(item[32]),
+                askPrice1: Number(item[33]),
+                askVolume1: Number(item[34]),
+                askPrice2: Number(item[35]),
+                askVolume2: Number(item[36]),
+                askPrice3: Number(item[37]),
+                askVolume3: Number(item[38]),
+                askPrice4: Number(item[39]),
+                askVolume4: Number(item[40]),
+                askPrice5: Number(item[41]),
+                askVolume5: Number(item[42]),
+            }
         });
         return chartData;
     },

@@ -80,6 +80,34 @@ export interface IChartData {
     prices: number[];
     // 成交量
     volumes: number[];
+    // 5档盘口
+    orderBooks: IOrderBook[]
+}
+
+/**
+ * 5档盘口
+ */
+export interface IOrderBook {
+    bidPrice1?: number;
+    bidVolume1?: number;
+    bidPrice2?: number;
+    bidVolume2?: number;
+    bidPrice3?: number;
+    bidVolume3?: number;
+    bidPrice4?: number;
+    bidVolume4?: number;
+    bidPrice5?: number;
+    bidVolume5?: number;
+    askPrice1?: number;
+    askVolume1?: number;
+    askPrice2?: number;
+    askVolume2?: number;
+    askPrice3?: number;
+    askVolume3?: number;
+    askPrice4?: number;
+    askVolume4?: number;
+    askPrice5?: number;
+    askVolume5?: number;
 }
 
 /**
