@@ -1,16 +1,16 @@
 .cell {
     display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
 
     margin-bottom: 20px;
-    align-items: center;
 }
 
 .cell_item {
     display: flex;
-    flex-direction: row;
     flex: 1;
+    flex-direction: row;
     align-items: center;
 }
 
@@ -21,19 +21,19 @@
 .cell_title {
     flex: 0 0 60px;
     margin-right: 8px;
-    text-align: right;
-    white-space: nowrap;
 
     font-weight: bold;
+    white-space: nowrap;
+    text-align: right;
 }
 
 .model_footer {
     display: flex;
     justify-content: flex-end;
     margin-top: 8px;
+    padding-top: 20px;
 
     border-top: solid 1px rgba(0, 0, 0, 0.06);
-    padding-top: 20px;
 }
 
 .need {
@@ -43,29 +43,28 @@
 .need::before {
     margin-left: -9px;
     padding-right: 4px;
-    font-size: 14px;
     color: red;
+    font-size: 14px;
+    vertical-align: middel;
     content: '*';
-    vertical-align: middel; 
 }
 
 // app
 .page {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 56px - 68px - 16px);
+    height: calc(100vh - 56px - 98px - 16px);
 }
 
 .toolbar {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    
+
     margin: 0 0 8px 0;
-    
-    background-color: white;
     padding: 8px 20px;
-  
+
+    background-color: white;
 }
 
 .toolbar_left {
@@ -75,9 +74,9 @@
 }
 
 .toolbar_left > * {
+    flex: 0 0 auto;
     margin-right: 8px;
     white-space: nowrap;
-    flex: 0 0 auto;
 }
 
 .toolbar_right {
@@ -90,10 +89,9 @@
 .toolbar_right > * {
     margin-left: 8px;
 }
-  
-.tableWrapper {
-    background-color: white;
-    padding: 20px;
 
+.tableWrapper {
     flex: 1;
+    padding: 20px;
+    background-color: white;
 }

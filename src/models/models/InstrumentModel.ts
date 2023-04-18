@@ -75,13 +75,12 @@ export interface InstrumentModel {
  */
 export interface IChartData {
     // 时间轴
-    times: string[],
+    times: string[];
     // 价格
-    prices: number[],
+    prices: number[];
     // 成交量
-    volumes: number[]
+    volumes: number[];
 }
-
 
 /**
  * 交易日市场返回数据格式
@@ -99,9 +98,9 @@ const schedule5 = ['9:30', '11:30', '13:00', '15:00'];
 const schedule6 = ['9:15', '11:30', '13:00', '15:15'];
 
 /**
- * 
+ *
  * @param timeString 交易时间字符串，格式为HH:mm
- * @returns 
+ * @returns
  */
 const getDate = (timeString: string): Date => {
     const times = timeString.split(':');
@@ -110,7 +109,6 @@ const getDate = (timeString: string): Date => {
     date.setMinutes(Number(times[1]));
     return date;
 };
-
 
 /**
  * 按交易时间段创建创建交易时间轴
@@ -191,8 +189,8 @@ const timeConfig1: ITimeConfig = {
         'hc', // 上期所
         'lu',
         'nr', // 能源
-      ],
-}
+    ],
+};
 
 // 9:00-10:15 10:30-11:30 13:30-15:00
 const timeConfig2: ITimeConfig = {
@@ -216,7 +214,7 @@ const timeConfig2: ITimeConfig = {
         'jd', // 大连交易所
         'wr', // 上期所
     ],
-}
+};
 // 9:00-10:15 10:30-11:30 13:30-15:00 21:00-01:00
 const timeConfig3: ITimeConfig = {
     schedule: schedule3,
@@ -229,8 +227,8 @@ const timeConfig3: ITimeConfig = {
         'ni',
         'ss', // 上期所
         'bc', // 能源
-      ]
-}
+    ],
+};
 
 // 9:00-10:15 10:30-11:30 13:30-15:00 21:00-02:30
 const timeConfig4: ITimeConfig = {
@@ -239,8 +237,8 @@ const timeConfig4: ITimeConfig = {
         'au',
         'ag', // 上期所
         'sc', // 能源
-      ]
-}
+    ],
+};
 
 // 9:30-11:30 13:00-15:00
 const timeConfig5: ITimeConfig = {
@@ -249,7 +247,7 @@ const timeConfig5: ITimeConfig = {
         'IF',
         'IC',
         'IH', // 中金
-    ]
+    ],
 };
 
 // 9:15-11:30 13:00-15:15
@@ -259,8 +257,8 @@ const timeConfig6: ITimeConfig = {
         'T',
         'TF',
         'TS', // 中金
-      ]
-}
+    ],
+};
 
 // 所有合约交易时间配置
 const timeConfig = [timeConfig1, timeConfig2, timeConfig3, timeConfig4, timeConfig5, timeConfig6];
@@ -285,17 +283,20 @@ export const getScheduleByInstrument = (instrument: string): string[] | undefine
             schedule = config.schedule;
         }
     });
-    
+
     return schedule;
-}
+};
 
 /**
-* 按合约获取交易时间轴
-* @param instrument 合约编号
-* @param interval 时间间隔，单位毫秒，默认500毫秒
-* @returns
-*/
-export const getTimeByInstrument = (instrument: string, interval: number = 500): string[] | undefined => {
+ * 按合约获取交易时间轴
+ * @param instrument 合约编号
+ * @param interval 时间间隔，单位毫秒，默认500毫秒
+ * @returns
+ */
+export const getTimeByInstrument = (
+    instrument: string,
+    interval: number = 500,
+): string[] | undefined => {
     const schedule = getScheduleByInstrument(instrument);
     if (!schedule) {
         return undefined;
@@ -306,12 +307,16 @@ export const getTimeByInstrument = (instrument: string, interval: number = 500):
 /**
  * 按时间获取交易时间轴index
  * @param instrument
- * @param actionTimeString 
- * @param tradingDates 
- * @returns 
+ * @param actionTimeString
+ * @param tradingDates
+ * @returns
  */
-export const getIndexByActionTime = (instrument: string, actionTimeString: string, interval: number) => {
-    // 
+export const getIndexByActionTime = (
+    instrument: string,
+    actionTimeString: string,
+    interval: number,
+) => {
+    //
     const schedule = getScheduleByInstrument(instrument);
     if (!schedule) {
         return undefined;
@@ -321,35 +326,43 @@ export const getIndexByActionTime = (instrument: string, actionTimeString: strin
     let day = 1;
     // 交易时间小于9的作为夜盘，加一天
     if (date.getHours() < 9) {
-      day = 2;
+        day = 2;
     }
-    const actionDate = new Date(1970, 0, day, date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
-    
+    const actionDate = new Date(
+        1970,
+        0,
+        day,
+        date.getHours(),
+        date.getMinutes(),
+        date.getSeconds(),
+        date.getMilliseconds(),
+    );
+
     // 交易时间轴对应的index
     let index = undefined;
     // 上一个交易时间段的index
-    let lastIndex  = 0;
+    let lastIndex = 0;
     // 按交易时间段计算index
     for (let n = 0; n < schedule.length; n = n + 2) {
-      // 开盘时间
-      const openTimeString = schedule[n];
-      const openTime = getDate(openTimeString).getTime();
-      // 收盘时间
-      const closeTimeString = schedule[n + 1];
-      let closeTime = getDate(closeTimeString).getTime();
-      if (closeTime < openTime) {
-        // 跨天调整
-        closeTime += 60 * 60 * 24 * 1000;
-      }
+        // 开盘时间
+        const openTimeString = schedule[n];
+        const openTime = getDate(openTimeString).getTime();
+        // 收盘时间
+        const closeTimeString = schedule[n + 1];
+        let closeTime = getDate(closeTimeString).getTime();
+        if (closeTime < openTime) {
+            // 跨天调整
+            closeTime += 60 * 60 * 24 * 1000;
+        }
 
-      if (actionDate.getTime() >= openTime && actionDate.getTime() <= closeTime) {
-        index = lastIndex +  Math.floor((actionDate.getTime() - openTime) / interval);
-        // console.log(actionTimeString, actionDate, actionDate.getTime(), openTime, closeTime, index)
-        break;
-      }
+        if (actionDate.getTime() >= openTime && actionDate.getTime() <= closeTime) {
+            index = lastIndex + Math.floor((actionDate.getTime() - openTime) / interval);
+            // console.log(actionTimeString, actionDate, actionDate.getTime(), openTime, closeTime, index)
+            break;
+        }
 
-      lastIndex += (closeTime - openTime) / interval + 1;
+        lastIndex += (closeTime - openTime) / interval + 1;
     }
-  
+
     return index;
-  };
+};
