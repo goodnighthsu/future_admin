@@ -1,3 +1,4 @@
+import config from 'config/config';
 import moment from 'moment';
 
 /**
@@ -126,6 +127,7 @@ const schedule3 = ['21:00', '01:00', '9:00', '10:15', '10:30', '11:30', '13:30',
 const schedule4 = ['21:00', '02:30', '9:00', '10:15', '10:30', '11:30', '13:30', '15:00'];
 const schedule5 = ['9:30', '11:30', '13:00', '15:00'];
 const schedule6 = ['9:15', '11:30', '13:00', '15:15'];
+const schedule7 = ['9:30', '11:30', '13:00', '15:00'];
 
 /**
  *
@@ -290,6 +292,12 @@ const timeConfig6: ITimeConfig = {
     ],
 };
 
+// 期权交易时间
+// 9:30-11:30 13:00-15:00
+// const timeConfig7: ITimeConfig = {
+//     schedule: schedule7,
+// }
+
 // 所有合约交易时间配置
 const timeConfig = [timeConfig1, timeConfig2, timeConfig3, timeConfig4, timeConfig5, timeConfig6];
 
@@ -300,6 +308,11 @@ export const getScheduleByInstrument = (instrument: string): string[] | undefine
     if (!instrument) {
         return undefined;
     }
+
+    if (instrument.length > 6) {
+        return schedule7;
+    }
+
     const matchs = instrument.match(/^\w{1,2}/);
     if (matchs?.length != 1) {
         return undefined;

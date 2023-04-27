@@ -1,3 +1,4 @@
+import { InstrumentModel } from '@/models/InstrumentListState';
 import {
     getIndexByActionTime,
     getTimeByInstrument,
@@ -22,8 +23,9 @@ const MarketList: React.FC = (props) => {
     const [instrumentSelected, setInstrumentSelected] = useState<string | undefined>();
     const instrumentRef = useRef<string | undefined>();
     const intervalRef = useRef<number>(500);
-    // 合约数据
-    // const [data, setData] = useState<IChartData>({ prices: [], times: [], volumes: [] });
+    // 合约详情
+    const [info, setInfo] = useState<InstrumentModel>();
+    // 合约市场数据
     const chartDataRef = useRef<IChartData | undefined>();
 
     // MARK: - --- methods ---
@@ -38,7 +40,24 @@ const MarketList: React.FC = (props) => {
         return ECharts.getInstanceByDom(element);
     };
 
-    // MARK: -  load 加载行情数据 method
+    // MARK: - 加载合约详情
+    /**
+     * 加载合约详情
+     * @param instrumentId
+     * @param tradingDay
+     * @returns
+     */
+    const loadInfo = async (_instrumentId: string, _tradingDay: string) => {
+        const response = await requestFuture.instrumentInfo(_instrumentId, _tradingDay);
+        console.log(response);
+        if (!response) {
+            return;
+        }
+        
+        setInfo(response);
+    }
+
+    // MARK: - 加载合约行情数据 method
     /**
      * 加载行情数据
      * @param abort
@@ -172,6 +191,9 @@ const MarketList: React.FC = (props) => {
                 const tickVolume = chartData.tickVolumes[dataIndex];
                 const volume = chartData.volumes[dataIndex];
                 const orderBook = chartData.orderBooks[dataIndex];
+                if (!orderBook) {
+                    return;
+                }
                 const positionHtmls = [
                     '<div style="height: 8px"></div>',
                     '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask5: ' +
@@ -415,6 +437,11 @@ const MarketList: React.FC = (props) => {
         );
 
         const abort = new AbortController();
+
+        // 合约详情
+        loadInfo(instrumentSelected, tradingDay?.format('YYYYMMDD'));
+
+        // 合约市场行情
         load(
             abort,
             _chartData,
@@ -445,6 +472,9 @@ const MarketList: React.FC = (props) => {
                             onChange={(value) => setInstrumentSelected(value as string)}
                         />
                     </div>
+                </div>
+                <div>
+                    合约名称：{info?.instrumentName} 合约乘数：{info?.volumeMultiple} 创建日期：{info?.createDate} 到期日期：{info?.expireDate}
                 </div>
                 <div id="eChart" className={styles.chart}></div>
             </div>

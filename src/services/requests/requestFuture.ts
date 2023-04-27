@@ -6,6 +6,7 @@ import {
 } from '@/models/models/InstrumentModel';
 import request, { IResponse } from '@/utils/request';
 export const requestFuture = {
+    // MARK: - 获取交易日合约分页列表 
     /**
      * 获取合约列表
      * @param tradingDay 交易日
@@ -40,6 +41,7 @@ export const requestFuture = {
         return response;
     },
 
+     // MARK: - 获取交易日合约列表 
     /**
      * 获取交易日的合约列表
      * @param tradingDay 交易日
@@ -58,6 +60,7 @@ export const requestFuture = {
         return response?.data?.sort();
     },
 
+    // MARK: - 订阅期货合约
     /**
      * 订阅期货合约
      *
@@ -72,6 +75,7 @@ export const requestFuture = {
         return response?.data;
     },
 
+    // MARK: - 取消订阅
     /**
      * 取消订阅
      */
@@ -87,6 +91,8 @@ export const requestFuture = {
         return response?.data;
     },
 
+
+    // MARK: - 获取合约交易日市场信息
     /**
      * 获取合约交易日市场信息
      * @param abortControllr
@@ -185,4 +191,23 @@ export const requestFuture = {
         });
         return chartData;
     },
+
+    // MARKS: - 获取合约交易日市场信息
+    /**
+     * 获取合约详细信息
+     */
+    instrumentInfo: async (instrumentId: string, tradingDay: string) => {
+        const response: IResponse<InstrumentModel> | undefined = await request('/ctp/market/instrument/info',
+            {
+                method: 'get',
+                params: {
+                    instrument: instrumentId,
+                    tradingDay: tradingDay,
+                },
+            },
+        );
+
+        return response?.data;
+    }
+        
 };
