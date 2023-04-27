@@ -57,7 +57,7 @@ export default [
     },
     {
         name: '合约',
-        path: '/instrument/instrument',
+        path: '/instrument/trade',
         component: './InstrumentList/InstrumentList',
     },
     {

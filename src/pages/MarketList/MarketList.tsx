@@ -1,4 +1,8 @@
-import { getTimeByInstrument, IChartData, IOrderBook } from '@/models/models/InstrumentModel';
+import {
+    getIndexByActionTime,
+    getTimeByInstrument,
+    IChartData,
+} from '@/models/models/InstrumentModel';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { PageContainer } from '@ant-design/pro-components';
 import { DatePicker, Select } from 'antd';
@@ -16,9 +20,11 @@ const MarketList: React.FC = (props) => {
     const [instrumentIds, setInstrumentsIds] = useState<string[]>([]);
     //
     const [instrumentSelected, setInstrumentSelected] = useState<string | undefined>();
+    const instrumentRef = useRef<string | undefined>();
+    const intervalRef = useRef<number>(500);
     // 合约数据
     // const [data, setData] = useState<IChartData>({ prices: [], times: [], volumes: [] });
-    const orderBooksRef = useRef<IOrderBook[]>([]);
+    const chartDataRef = useRef<IChartData | undefined>();
 
     // MARK: - --- methods ---
     /**
@@ -49,7 +55,7 @@ const MarketList: React.FC = (props) => {
         _tradingDay?: string,
         index?: number,
     ) => {
-        const response:IChartData | undefined = await requestFuture.marketList(
+        const response: IChartData | undefined = await requestFuture.marketList(
             abort,
             _data,
             interval,
@@ -64,16 +70,15 @@ const MarketList: React.FC = (props) => {
         chart?.setOption({
             series: [
                 {
-                    data: _data.prices,
+                    data: response.prices,
                 },
                 {
-                    data: _data.volumes,
+                    data: response.tickVolumes,
                 },
             ],
         });
-
-        // 盘口数据
-        orderBooksRef.current = response.orderBooks;
+        //
+        chartDataRef.current = response;
     };
 
     // MARK: - 获取交易日合约列表 method
@@ -97,6 +102,7 @@ const MarketList: React.FC = (props) => {
         setInstrumentsIds(response);
     };
 
+    // MARK: --- echart init ---
     /**
      * 创建echart
      */
@@ -112,6 +118,10 @@ const MarketList: React.FC = (props) => {
             confine: true,
             className: styles.toolTip,
             transitionDuration: 0,
+            axisPointer: {
+                axis: 'y',
+                snap: true,
+            },
             // 自定义tool tip
             formatter: (params: any) => {
                 if (!isArray(params) || params.length == 0) {
@@ -119,7 +129,7 @@ const MarketList: React.FC = (props) => {
                 }
 
                 let obj = undefined;
-                for (let i = params.length - 1; i >= 0; i--) {
+                for (let i = 0; i < params.length; i++) {
                     const item = params[i];
                     if (item.axisType == 'xAxis.category') {
                         obj = item;
@@ -131,126 +141,104 @@ const MarketList: React.FC = (props) => {
                     return [];
                 }
 
+                if (!instrumentRef.current) {
+                    return;
+                }
+
+                const dataIndex = getIndexByActionTime(
+                    instrumentRef.current,
+                    '1980-01-01 ' + obj.axisValue,
+                    intervalRef.current,
+                );
+                if (dataIndex === undefined) {
+                    return;
+                }
+
                 // time html
                 const time = obj.axisValue;
                 const timeHtmls = [
                     '<div style="display:flex;flex-direction:column;justify-content:space-between;width:100%">',
                     '<div style="display:flex;flex-direction:row;justify-content:space-between"><div>Time: </div> ' +
-                    time +
-                    '</div>',
+                        time +
+                        '</div>',
                 ];
 
-                const dataIndex = obj.dataIndex;
-
-                console.log('orderbook: ', orderBooksRef.current[dataIndex]);
-                const option = chart?.getOption() as any;
-                // console.log(chart.getOption().series[0].data[dataIndex]);
-                const series = option.series;
-                // position html
-                const payload = series[0].data[dataIndex] ?? [];
-                let positionHtmls: string[] = [];
-                if (payload.length > 0 && payload[1]) {
-                    const price = payload[1];
-                    const tickVolume = payload[2];
-                    const volume = payload[23];
-                    positionHtmls = [
-                        '<div style="height: 8px"></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask5: ' +
-                        payload[21] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[22] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask4: ' +
-                        payload[19] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[20] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask3: ' +
-                        payload[17] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[18] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask2: ' +
-                        payload[15] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[16] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask1: ' +
-                        payload[13] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[14] +
-                        '</div></div>',
-                        '<div style="height: 8px"></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid1: ' +
-                        payload[3] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[4] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid2: ' +
-                        payload[5] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[6] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid3: ' +
-                        payload[7] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[8] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid4: ' +
-                        payload[9] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[10] +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid5: ' +
-                        payload[11] +
-                        '</div><div style="text-align:right;width:80px">' +
-                        payload[12] +
-                        '</div></div>',
-                        '<div style="height: 8px"></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between">Last Price: <div style="text-align:right">' +
-                        price +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between">Tick Vol: <div style="text-align:right">' +
-                        tickVolume +
-                        '</div></div>',
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between">Volume: <div style="text-align:right">' +
-                        volume +
-                        '</div></div>',
-                    ];
+                const chartData: IChartData | undefined = chartDataRef.current;
+                if (!chartData) {
+                    return;
                 }
 
-                // param html
-                const getParamHtml = (serie: any) => {
-                    if (serie.name == undefined) {
-                        return undefined;
-                    }
-                    if (serie.data == undefined) {
-                        return undefined;
-                    }
-                    const item = serie.data[dataIndex] ?? [];
-                    const value = item[1];
-                    if (value == undefined) {
-                        return undefined;
-                    }
-                    const paramName = serie.name;
-
-                    const html =
-                        '<div style="display:flex; flex-direction:row;justify-content:space-between">' +
-                        paramName +
-                        ': <div style="text-align:right">' +
-                        value +
-                        '</div></div>';
-
-                    return html;
-                };
-
+                const price = chartData.prices[dataIndex];
+                const tickVolume = chartData.tickVolumes[dataIndex];
+                const volume = chartData.volumes[dataIndex];
+                const orderBook = chartData.orderBooks[dataIndex];
+                const positionHtmls = [
+                    '<div style="height: 8px"></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask5: ' +
+                        orderBook.askPrice5 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.askVolume5 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask4: ' +
+                        orderBook.askPrice4 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.askVolume4 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask3: ' +
+                        orderBook.askPrice3 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.askVolume3 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask2: ' +
+                        orderBook.askPrice2 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.askVolume2 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask1: ' +
+                        orderBook.askPrice1 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.askVolume1 +
+                        '</div></div>',
+                    '<div style="height: 8px"></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid1: ' +
+                        orderBook.bidPrice1 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.bidVolume1 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid2: ' +
+                        orderBook.bidPrice2 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.bidVolume2 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid3: ' +
+                        orderBook.bidPrice3 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.bidVolume3 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid4: ' +
+                        orderBook.bidPrice4 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.bidVolume4 +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid5: ' +
+                        orderBook.bidPrice5 +
+                        '</div><div style="text-align:right;width:80px">' +
+                        orderBook.bidVolume5 +
+                        '</div></div>',
+                    '<div style="height: 8px"></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Last Price: <div style="text-align:right">' +
+                        price +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Tick Vol: <div style="text-align:right">' +
+                        tickVolume +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Volume: <div style="text-align:right">' +
+                        volume +
+                        '</div></div>',
+                ];
 
                 // tool tip
-                const toolTipHtmls = [
-                    ...timeHtmls,
-                    ...positionHtmls,
-                    '</div>',
-                ];
+                const toolTipHtmls = [...timeHtmls, ...positionHtmls, '</div>'];
 
                 return toolTipHtmls.join('');
             },
@@ -268,7 +256,7 @@ const MarketList: React.FC = (props) => {
 
                 return obj;
             },
-        }
+        };
         const option = {
             title: { text: '合约' },
             xAxis: [
@@ -290,13 +278,14 @@ const MarketList: React.FC = (props) => {
                     type: 'value',
                     min: 'dataMin',
                     max: 'dataMax',
+                    minInterval: 1,
                     axisLabel: {
                         formatter: (value: number) => {
                             return value;
                         },
                     },
                     axisPointer: {
-                        show: true,
+                        show: false,
                     },
                 },
                 {
@@ -338,7 +327,7 @@ const MarketList: React.FC = (props) => {
                     index: 0,
                     name: 'price',
                     type: 'line',
-                    symbol: 'none',
+                    symbol: 'arrow',
                     lineStyle: {
                         color: '#4159ba',
                         width: 1,
@@ -350,7 +339,7 @@ const MarketList: React.FC = (props) => {
                     },
                     showSymbol: false,
                     connectNulls: true,
-                    sampling: 'lttb',
+                    // sampling: 'lttb',    // 影响tooltip连续
                 },
                 {
                     // 成交量
@@ -395,24 +384,16 @@ const MarketList: React.FC = (props) => {
 
     // MARK: - effect 构建chart数据
     /**
-     * 合约变更后更新chart 时间轴
-     */
-    useEffect(() => {
-        if (!instrumentSelected) {
-            return;
-        }
-    }, [instrumentSelected]);
-
-    /**
      * 选择合约加载市场行情
      */
     useEffect(() => {
+        instrumentRef.current = instrumentSelected;
         if (!instrumentSelected || !tradingDay) {
             return;
         }
 
         // 构建chart数据
-        const _times = getTimeByInstrument(instrumentSelected, 500);
+        const _times = getTimeByInstrument(instrumentSelected, intervalRef.current);
         if (!_times) {
             return;
         }
@@ -420,6 +401,7 @@ const MarketList: React.FC = (props) => {
         const _chartData: IChartData = {
             times: _times,
             prices: new Array(_times.length),
+            tickVolumes: new Array(_times.length),
             volumes: new Array(_times.length),
             orderBooks: new Array(_times.length),
         };
@@ -433,7 +415,13 @@ const MarketList: React.FC = (props) => {
         );
 
         const abort = new AbortController();
-        load(abort, _chartData, 500, instrumentSelected, tradingDay?.format('YYYYMMDD'));
+        load(
+            abort,
+            _chartData,
+            intervalRef.current,
+            instrumentSelected,
+            tradingDay?.format('YYYYMMDD'),
+        );
         return () => {
             abort.abort();
         };

@@ -80,8 +80,10 @@ export interface IChartData {
     prices: number[];
     // 成交量
     volumes: number[];
+    // tick volume:
+    tickVolumes: number[];
     // 5档盘口
-    orderBooks: IOrderBook[]
+    orderBooks: IOrderBook[];
 }
 
 /**
@@ -385,7 +387,6 @@ export const getIndexByActionTime = (
 
         if (actionDate.getTime() >= openTime && actionDate.getTime() <= closeTime) {
             index = lastIndex + Math.floor((actionDate.getTime() - openTime) / interval);
-            // console.log(actionTimeString, actionDate, actionDate.getTime(), openTime, closeTime, index)
             break;
         }
 
