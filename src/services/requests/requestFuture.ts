@@ -126,8 +126,10 @@ export const requestFuture = {
 
         const datas: string[] = response?.data;
         const result: MarketData = datas.map((item) => item.split(','));
+        let lastPrice = 0
         let lastVolume = 0;
         let lastIndex = 0;
+        let lastOrderBook = {};
         // 格式化数据填充到chartData
         result.map((item) => {
             const actionTime = item[43];
@@ -135,18 +137,7 @@ export const requestFuture = {
             if (_index === undefined) {
                 return;
             }
-
-            // 使用上一成交价格填充空白数据
-            if (_index - lastIndex > 1) {
-                const lastPrice = chartData.prices[lastIndex];
-                chartData.prices.fill(lastPrice, lastIndex, _index);
-                chartData.volumes.fill(lastVolume, lastIndex, _index);
-                const lastTickVolume = chartData.tickVolumes[lastIndex];
-                chartData.tickVolumes.fill(lastTickVolume, lastIndex, _index);
-                const lastOrderBook = chartData.orderBooks[lastIndex];
-                chartData.orderBooks.fill(lastOrderBook, lastIndex, _index);
-            }
-
+            
             // 返回数据没有区分0 250 500 750 毫秒，
             // 在tick 的interval是 250 或 500, index有数据时就放到下个index
             if (chartData.prices[_index] !== undefined) {
@@ -158,15 +149,7 @@ export const requestFuture = {
             const price = Number(item[6]);
             const volume = Number(item[13]);
             const tickVolume = Number(volume) - lastVolume;
-            lastIndex = _index;
-            lastVolume = volume;
-            // 成交价
-            chartData.prices[_index] = price;
-            // 成交量
-            chartData.tickVolumes[_index] = tickVolume;
-            chartData.volumes[_index] = volume;
-            // 5档盘口
-            chartData.orderBooks[_index] = {
+            const orderBooks = {
                 bidPrice1: Number(item[23]),
                 bidVolume1: Number(item[24]),
                 bidPrice2: Number(item[27]),
@@ -187,7 +170,34 @@ export const requestFuture = {
                 askVolume4: Number(item[38]),
                 askPrice5: Number(item[41]),
                 askVolume5: Number(item[42]),
-            };
+            }
+            // 成交价
+            chartData.prices[_index] = price;
+            // 成交量
+            chartData.tickVolumes[_index] = tickVolume;
+            chartData.volumes[_index] = volume;
+            // 5档盘口
+            chartData.orderBooks[_index] = orderBooks;
+
+            // 使用上一成交价格填充空白数据
+            if (_index - lastIndex > 1) {
+                if (lastIndex === 0) {
+                    chartData.prices.fill(price, lastIndex, _index);
+                    chartData.volumes.fill(volume, lastIndex, _index);
+                    chartData.tickVolumes.fill(0, lastIndex, _index);
+                    chartData.orderBooks.fill(orderBooks, lastIndex, _index);
+                }else {
+                    chartData.prices.fill(lastPrice, lastIndex+1, _index);
+                    chartData.volumes.fill(lastVolume, lastIndex+1, _index);
+                    chartData.tickVolumes.fill(0, lastIndex+1, _index);
+                    chartData.orderBooks.fill(lastOrderBook, lastIndex+1, _index);
+                }
+            }
+
+            lastIndex = _index;
+            lastVolume = volume;
+            lastPrice = price;
+            lastOrderBook = orderBooks;
         });
         return chartData;
     },

@@ -67,7 +67,7 @@ const errorHandler = (error: {
     if (status !== 200) {
         const tip = statusText || status;
         notification.error({
-            description: `Request error ${tip}:  ${url}`,
+            description: `${tip}:  ${url}`,
             message: errorTip,
         });
     }
@@ -125,7 +125,7 @@ const myErrorHandler = async (response: Response, options: any) => {
         return data;
     }
 
-    return { response: response, errorMessage: _message };
+    throw { response: response, errorMessage: _message };
 };
 
 /**

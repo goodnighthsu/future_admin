@@ -1,7 +1,7 @@
 const server = () => {
     if (process.env.NODE_ENV === 'development') {
         // return 'http://xleon.site:8200'
-        return 'http://localhost:8200'
+        return 'http://xleon.site:8848'
     } else {
         // return new URL(window.location.href);
         return 'https://xleon.site/gateway'
