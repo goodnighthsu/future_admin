@@ -21,13 +21,6 @@ export default [
         ],
     },
     {
-        path: '/welcome',
-        name: 'welcome',
-        icon: 'smile',
-        component: './Welcome',
-        access: 'routeFilter',
-    },
-    {
         path: '/admin',
         name: 'admin',
         icon: 'crown',
@@ -45,14 +38,8 @@ export default [
         ],
     },
     {
-        name: 'list.table-list',
-        icon: 'table',
-        path: '/list',
-        component: './TableList',
-    },
-    {
         path: '/',
-        redirect: '/welcome',
+        redirect: '/instrument/trade',
         access: 'routeFilter',
     },
     {
