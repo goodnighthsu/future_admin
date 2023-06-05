@@ -83,6 +83,10 @@ export interface IChartData {
     volumes: number[];
     // tick volume:
     tickVolumes: number[];
+    // 持仓量
+    openInterests: number[];
+    // 沉淀资金 = 持仓量*最新价*合约手数*保证金比例
+    funds: number[];
     // 5档盘口
     orderBooks: IOrderBook[];
 }

@@ -49,7 +49,6 @@ const MarketList: React.FC = (props) => {
      */
     const loadInfo = async (_instrumentId: string, _tradingDay: string) => {
         const response = await requestFuture.instrumentInfo(_instrumentId, _tradingDay);
-        console.log(response);
         if (!response) {
             return;
         }
@@ -74,6 +73,8 @@ const MarketList: React.FC = (props) => {
         _tradingDay?: string,
         index?: number,
     ) => {
+        const chart = getChart();
+        chart?.showLoading();
         const response: IChartData | undefined = await requestFuture.marketList(
             abort,
             _data,
@@ -82,10 +83,11 @@ const MarketList: React.FC = (props) => {
             _tradingDay,
             index,
         );
+        chart?.hideLoading();
         if (!response) {
             return;
         }
-        const chart = getChart();
+        
         chart?.setOption({
             series: [
                 {
@@ -94,6 +96,12 @@ const MarketList: React.FC = (props) => {
                 {
                     data: response.tickVolumes,
                 },
+                {
+                    data: response.openInterests,
+                },
+                {
+                    data: response.funds
+                }
             ],
         });
         //
@@ -190,6 +198,8 @@ const MarketList: React.FC = (props) => {
                 const price = chartData.prices[dataIndex];
                 const tickVolume = chartData.tickVolumes[dataIndex];
                 const volume = chartData.volumes[dataIndex];
+                const openInterest = chartData.openInterests[dataIndex];
+                const fund = chartData.funds[dataIndex];
                 const orderBook = chartData.orderBooks[dataIndex];
                 if (!orderBook) {
                     return;
@@ -257,6 +267,12 @@ const MarketList: React.FC = (props) => {
                     '<div style="display:flex; flex-direction:row;justify-content:space-between">Volume: <div style="text-align:right">' +
                         volume +
                         '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Open Interest: <div style="text-align:right">' +
+                        openInterest +
+                        '</div></div>',
+                    '<div style="display:flex; flex-direction:row;justify-content:space-between">沉淀资金: <div style="text-align:right">' +
+                        fund +
+                        '</div></div>',
                 ];
 
                 // tool tip
@@ -281,6 +297,9 @@ const MarketList: React.FC = (props) => {
         };
         const option = {
             title: { text: '合约' },
+            legend: {
+                show: true,
+            },
             xAxis: [
                 {
                     // 行情时间
@@ -321,6 +340,35 @@ const MarketList: React.FC = (props) => {
                     splitLine: { show: false },
                     axisPointer: {
                         show: true,
+                    },
+                },
+                {
+                    // 持仓量
+                    type: 'value',
+                    min: 'dataMin',
+                    max: 'dataMax',
+                    axisLabel: {
+                        formatter: (value: number) => {
+                            return value;
+                        },
+                    },
+                    axisPointer: {
+                        show: false,
+                    },
+                },
+                ,
+                {
+                    // 沉淀资金
+                    type: 'value',
+                    min: 'dataMin',
+                    max: 'dataMax',
+                    axisLabel: {
+                        formatter: (value: number) => {
+                            return value;
+                        },
+                    },
+                    axisPointer: {
+                        show: false,
                     },
                 },
             ],
@@ -375,6 +423,44 @@ const MarketList: React.FC = (props) => {
                     },
                     sampling: 'lttb',
                 },
+                {
+                    // 持仓量
+                    index: 2,
+                    name: 'openInterest',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    yAxisIndex: 2,
+                    symbol: 'arrow',
+                    lineStyle: {
+                        width: 1,
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 1,
+                        },
+                    },
+                    showSymbol: false,
+                    connectNulls: true,
+                },
+                {
+                    // 沉淀资金
+                    index: 3,
+                    name: '沉淀资金',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    yAxisIndex: 3,
+                    symbol: 'arrow',
+                    lineStyle: {
+                        width: 1,
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 1,
+                        },
+                    },
+                    showSymbol: false,
+                    connectNulls: true,
+                },
             ],
         };
         chart.setOption(option);
@@ -425,6 +511,8 @@ const MarketList: React.FC = (props) => {
             prices: new Array(_times.length),
             tickVolumes: new Array(_times.length),
             volumes: new Array(_times.length),
+            openInterests: new Array(_times.length),
+            funds: new Array(_times.length),
             orderBooks: new Array(_times.length),
         };
         // setData(_chartData);

@@ -5,6 +5,7 @@ import {
     MarketData,
 } from '@/models/models/InstrumentModel';
 import request, { IResponse } from '@/utils/request';
+
 export const requestFuture = {
     // MARK: - 获取交易日合约分页列表 
     /**
@@ -24,7 +25,7 @@ export const requestFuture = {
         pageSize?: number,
     ) => {
         const response: IResponse<InstrumentModel[]> | undefined = await request(
-            '/ctp/trade/instruments',
+            '/ctpslave/trade/instruments',
             {
                 method: 'get',
                 params: {
@@ -48,7 +49,7 @@ export const requestFuture = {
      */
     instrumentsByTradingDay: async (tradingDay?: string) => {
         const response: IResponse<string[]> | undefined = await request(
-            '/ctp/trade/instrument/all',
+            '/ctpslave/trade/instrument/all',
             {
                 method: 'get',
                 params: {
@@ -67,7 +68,7 @@ export const requestFuture = {
      * @returns
      */
     subscribe: async (insturments: string[]) => {
-        const response: IResponse<string[]> | undefined = await request('/ctp/trade/subscribe', {
+        const response: IResponse<string[]> | undefined = await request('/ctpslave/trade/subscribe', {
             method: 'put',
             data: insturments,
         });
@@ -81,7 +82,7 @@ export const requestFuture = {
      */
     unsubscribe: async (insturments: string[]) => {
         const response: IResponse<string[]> | undefined = await request(
-            '/ctp/instrument/unsubscribe',
+            '/ctpslave/instrument/unsubscribe',
             {
                 method: 'put',
                 data: insturments,
@@ -110,7 +111,7 @@ export const requestFuture = {
         tradingDay?: string,
         index?: number,
     ) => {
-        const response: IResponse<any> | undefined = await request('/ctp/market/query', {
+        const response: IResponse<any> | undefined = await request('/ctpslave/market/query', {
             method: 'get',
             params: {
                 instrument: instrumentId,
@@ -128,6 +129,8 @@ export const requestFuture = {
         const result: MarketData = datas.map((item) => item.split(','));
         let lastPrice = 0
         let lastVolume = 0;
+        let lastOpenInterest = 0;
+        let lastFund = 0;
         let lastIndex = 0;
         let lastOrderBook = {};
         // 格式化数据填充到chartData
@@ -149,6 +152,9 @@ export const requestFuture = {
             const price = Number(item[6]);
             const volume = Number(item[13]);
             const tickVolume = Number(volume) - lastVolume;
+            const openInterest = Number(item[15]);
+            // 沉淀资金 持仓量*最新价*合约手数*保证金比例
+            const fund = openInterest * price;
             const orderBooks = {
                 bidPrice1: Number(item[23]),
                 bidVolume1: Number(item[24]),
@@ -176,7 +182,11 @@ export const requestFuture = {
             // 成交量
             chartData.tickVolumes[_index] = tickVolume;
             chartData.volumes[_index] = volume;
-            // 5档盘口
+            // 持仓量
+            chartData.openInterests[_index] = openInterest;
+            // 沉淀资金
+            chartData.funds[_index] = fund;
+            // 5档盘口 
             chartData.orderBooks[_index] = orderBooks;
 
             // 使用上一成交价格填充空白数据
@@ -185,11 +195,15 @@ export const requestFuture = {
                     chartData.prices.fill(price, lastIndex, _index);
                     chartData.volumes.fill(volume, lastIndex, _index);
                     chartData.tickVolumes.fill(0, lastIndex, _index);
+                    chartData.openInterests.fill(openInterest, lastIndex, _index);
+                    chartData.funds.fill(fund, lastIndex, _index);
                     chartData.orderBooks.fill(orderBooks, lastIndex, _index);
                 }else {
                     chartData.prices.fill(lastPrice, lastIndex+1, _index);
                     chartData.volumes.fill(lastVolume, lastIndex+1, _index);
                     chartData.tickVolumes.fill(0, lastIndex+1, _index);
+                    chartData.openInterests.fill(lastOpenInterest, lastIndex+1, _index);
+                    chartData.funds.fill(lastFund, lastIndex+1, _index);
                     chartData.orderBooks.fill(lastOrderBook, lastIndex+1, _index);
                 }
             }
@@ -197,6 +211,8 @@ export const requestFuture = {
             lastIndex = _index;
             lastVolume = volume;
             lastPrice = price;
+            lastOpenInterest = openInterest;
+            lastFund = fund;
             lastOrderBook = orderBooks;
         });
         return chartData;
@@ -207,7 +223,7 @@ export const requestFuture = {
      * 获取合约详细信息
      */
     instrumentInfo: async (instrumentId: string, tradingDay: string) => {
-        const response: IResponse<InstrumentModel> | undefined = await request('/ctp/market/instrument/info',
+        const response: IResponse<InstrumentModel> | undefined = await request('/ctpslave/market/instrument/info',
             {
                 method: 'get',
                 params: {
