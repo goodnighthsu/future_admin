@@ -442,25 +442,25 @@ const MarketList: React.FC = (props) => {
                     showSymbol: false,
                     connectNulls: true,
                 },
-                {
-                    // 沉淀资金
-                    index: 3,
-                    name: '沉淀资金',
-                    type: 'line',
-                    xAxisIndex: 0,
-                    yAxisIndex: 3,
-                    symbol: 'arrow',
-                    lineStyle: {
-                        width: 1,
-                    },
-                    emphasis: {
-                        lineStyle: {
-                            width: 1,
-                        },
-                    },
-                    showSymbol: false,
-                    connectNulls: true,
-                },
+                // {
+                //     // 沉淀资金
+                //     index: 3,
+                //     name: '沉淀资金',
+                //     type: 'line',
+                //     xAxisIndex: 0,
+                //     yAxisIndex: 3,
+                //     symbol: 'arrow',
+                //     lineStyle: {
+                //         width: 1,
+                //     },
+                //     emphasis: {
+                //         lineStyle: {
+                //             width: 1,
+                //         },
+                //     },
+                //     showSymbol: false,
+                //     connectNulls: true,
+                // },
             ],
         };
         chart.setOption(option);

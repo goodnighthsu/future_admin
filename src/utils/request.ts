@@ -102,6 +102,10 @@ request.interceptors.request.use((url, options) => {
 });
 
 const myErrorHandler = async (response: Response, options: any) => {
+    if (response.status >= 400) {
+        throw {response, errorMessage: `Request(${response.status}): ${response.statusText}`};
+    }
+    
     if (options.responseType === 'blob') {
         return response;
     }

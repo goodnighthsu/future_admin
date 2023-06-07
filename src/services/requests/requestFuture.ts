@@ -10,28 +10,22 @@ export const requestFuture = {
     // MARK: - 获取交易日合约分页列表 
     /**
      * 获取合约列表
-     * @param tradingDay 交易日
      * @param keyword 关键字
-     * @param subscribes 订阅状态
      * @param page 页码
      * @param pageSize 页大小
      * @returns 合约分页列表
      */
     instrumentList: async (
-        tradingDay?: string,
         keyword?: string,
-        subscribes: boolean[] = [],
         page?: number,
         pageSize?: number,
     ) => {
         const response: IResponse<InstrumentModel[]> | undefined = await request(
-            '/ctpslave/trade/instruments',
+            '/ctpslave/market/instruments',
             {
                 method: 'get',
                 params: {
-                    tradingDay: tradingDay,
                     keyword: keyword ?? '',
-                    subscribes: subscribes?.toString(),
                     page: page,
                     pageSize: pageSize,
                 },
