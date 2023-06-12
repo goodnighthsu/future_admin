@@ -47,13 +47,14 @@ const MarketList: React.FC = (props) => {
      * @param tradingDay
      * @returns
      */
-    const loadInfo = async (_instrumentId: string, _tradingDay: string) => {
-        const response = await requestFuture.instrumentInfo(_instrumentId, _tradingDay);
+    const loadInfo = async (_instrumentId: string) => {
+        const response = await requestFuture.instrumentInfo(_instrumentId);
         if (!response) {
             return;
         }
         
         setInfo(response);
+        return response;
     }
 
     // MARK: - 加载合约行情数据 method
@@ -69,7 +70,7 @@ const MarketList: React.FC = (props) => {
         abort: AbortController,
         _data: IChartData,
         interval: number,
-        instrumentId: string,
+        instrument: InstrumentModel,
         _tradingDay?: string,
         index?: number,
     ) => {
@@ -79,7 +80,7 @@ const MarketList: React.FC = (props) => {
             abort,
             _data,
             interval,
-            instrumentId,
+            instrument,
             _tradingDay,
             index,
         );
@@ -115,13 +116,7 @@ const MarketList: React.FC = (props) => {
      * @returns
      */
     const loadInstrumentIds = async (_tradingDay: moment.Moment | null) => {
-        if (!_tradingDay) {
-            setInstrumentsIds([]);
-            return;
-        }
-        const response = await requestFuture.instrumentsByTradingDay(
-            _tradingDay?.format('YYYYMMDD'),
-        );
+        const response = await requestFuture.instruments();
         if (!response) {
             return;
         }
@@ -204,75 +199,42 @@ const MarketList: React.FC = (props) => {
                 if (!orderBook) {
                     return;
                 }
+
+                // 
+                const quoteCell = (value1:number | undefined, value2: number | undefined) => {
+                    return '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask5: ' +
+                    value1 +
+                    '</div><div style="text-align:right;width:120px">' +
+                    value2 +
+                    '</div></div>';
+                }
+
+                const infoCell = (tip: string, value: string | number | undefined) => {
+                    return '<div style="display:flex; flex-direction:row;justify-content:space-between">' +
+                    tip + 
+                    ': <div style="text-align:right">' +
+                    value +
+                    '</div></div>';
+                }
                 const positionHtmls = [
                     '<div style="height: 8px"></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask5: ' +
-                        orderBook.askPrice5 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.askVolume5 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask4: ' +
-                        orderBook.askPrice4 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.askVolume4 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask3: ' +
-                        orderBook.askPrice3 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.askVolume3 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask2: ' +
-                        orderBook.askPrice2 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.askVolume2 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Ask1: ' +
-                        orderBook.askPrice1 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.askVolume1 +
-                        '</div></div>',
+                    quoteCell(orderBook.askPrice5, orderBook.askVolume5),
+                    quoteCell(orderBook.askPrice4, orderBook.askVolume4),
+                    quoteCell(orderBook.askPrice3, orderBook.askVolume3),
+                    quoteCell(orderBook.askPrice2, orderBook.askVolume2),
+                    quoteCell(orderBook.askPrice1, orderBook.askVolume1),
                     '<div style="height: 8px"></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid1: ' +
-                        orderBook.bidPrice1 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.bidVolume1 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid2: ' +
-                        orderBook.bidPrice2 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.bidVolume2 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid3: ' +
-                        orderBook.bidPrice3 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.bidVolume3 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid4: ' +
-                        orderBook.bidPrice4 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.bidVolume4 +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between"><div>Bid5: ' +
-                        orderBook.bidPrice5 +
-                        '</div><div style="text-align:right;width:80px">' +
-                        orderBook.bidVolume5 +
-                        '</div></div>',
+                    quoteCell(orderBook.bidPrice1, orderBook.bidVolume1),
+                    quoteCell(orderBook.bidPrice2, orderBook.bidVolume2),
+                    quoteCell(orderBook.bidPrice3, orderBook.bidVolume3),
+                    quoteCell(orderBook.bidPrice4, orderBook.bidVolume4),
+                    quoteCell(orderBook.bidPrice5, orderBook.bidVolume5),
                     '<div style="height: 8px"></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Last Price: <div style="text-align:right">' +
-                        price +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Tick Vol: <div style="text-align:right">' +
-                        tickVolume +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Volume: <div style="text-align:right">' +
-                        volume +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between">Open Interest: <div style="text-align:right">' +
-                        openInterest +
-                        '</div></div>',
-                    '<div style="display:flex; flex-direction:row;justify-content:space-between">沉淀资金: <div style="text-align:right">' +
-                        fund +
-                        '</div></div>',
+                    infoCell('Last Price', price),
+                    infoCell('Tick Vol', tickVolume),
+                    infoCell('Volume', volume),
+                    infoCell('Open Interest', openInterest),
+                    infoCell('沉淀资金', (fund / 10000).toFixed(2) + '万'),
                 ];
 
                 // tool tip
@@ -356,7 +318,6 @@ const MarketList: React.FC = (props) => {
                         show: false,
                     },
                 },
-                ,
                 {
                     // 沉淀资金
                     type: 'value',
@@ -364,7 +325,7 @@ const MarketList: React.FC = (props) => {
                     max: 'dataMax',
                     axisLabel: {
                         formatter: (value: number) => {
-                            return value;
+                            return (value / 10000).toFixed(2) + '万';   
                         },
                     },
                     axisPointer: {
@@ -442,25 +403,25 @@ const MarketList: React.FC = (props) => {
                     showSymbol: false,
                     connectNulls: true,
                 },
-                // {
-                //     // 沉淀资金
-                //     index: 3,
-                //     name: '沉淀资金',
-                //     type: 'line',
-                //     xAxisIndex: 0,
-                //     yAxisIndex: 3,
-                //     symbol: 'arrow',
-                //     lineStyle: {
-                //         width: 1,
-                //     },
-                //     emphasis: {
-                //         lineStyle: {
-                //             width: 1,
-                //         },
-                //     },
-                //     showSymbol: false,
-                //     connectNulls: true,
-                // },
+                {
+                    // 沉淀资金
+                    index: 3,
+                    name: '沉淀资金',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    yAxisIndex: 3,
+                    symbol: 'arrow',
+                    lineStyle: {
+                        width: 1,
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 1,
+                        },
+                    },
+                    showSymbol: false,
+                    connectNulls: true,
+                },
             ],
         };
         chart.setOption(option);
@@ -524,22 +485,28 @@ const MarketList: React.FC = (props) => {
             { xAxis: { data: _chartData.times } },
         );
 
-        const abort = new AbortController();
-
+       
         // 合约详情
-        loadInfo(instrumentSelected, tradingDay?.format('YYYYMMDD'));
+        (async () => {
+            const _info = await loadInfo(instrumentSelected);
+            if (!_info) {
+                return;
+            }
 
-        // 合约市场行情
-        load(
-            abort,
-            _chartData,
-            intervalRef.current,
-            instrumentSelected,
-            tradingDay?.format('YYYYMMDD'),
-        );
-        return () => {
-            abort.abort();
-        };
+            const abort = new AbortController();
+
+            // 合约市场行情
+            load(
+                abort,
+                _chartData,
+                intervalRef.current,
+                _info,
+                tradingDay?.format('YYYYMMDD'),
+            );
+            return () => {
+                abort.abort();
+            };
+        })();
     }, [instrumentSelected, tradingDay]);
 
     // MARK: - --- render ---
@@ -561,8 +528,11 @@ const MarketList: React.FC = (props) => {
                         />
                     </div>
                 </div>
-                <div>
-                    合约名称：{info?.instrumentName} 合约乘数：{info?.volumeMultiple} 创建日期：{info?.createDate} 到期日期：{info?.expireDate}
+                <div className={styles.instrumentInfo}>
+                    <span>合约名称：</span>{info?.instrumentName}
+                    <span>合约乘数：</span>{info?.volumeMultiple}
+                    <span>创建日期：</span>{info?.createDate}
+                    <span>到期日期：</span>{info?.expireDate}
                 </div>
                 <div id="eChart" className={styles.chart}></div>
             </div>

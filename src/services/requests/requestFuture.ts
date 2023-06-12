@@ -41,9 +41,9 @@ export const requestFuture = {
      * 获取交易日的合约列表
      * @param tradingDay 交易日
      */
-    instrumentsByTradingDay: async (tradingDay?: string) => {
+    instruments: async (tradingDay?: string) => {
         const response: IResponse<string[]> | undefined = await request(
-            '/ctpslave/trade/instrument/all',
+            '/ctpslave/market/instruments/all',
             {
                 method: 'get',
                 params: {
@@ -101,14 +101,17 @@ export const requestFuture = {
         abortControllr: AbortController,
         chartData: IChartData,
         interval: number,
-        instrumentId: string,
+        instrument: InstrumentModel,
         tradingDay?: string,
         index?: number,
     ) => {
+        console.log(instrument);
+
+        //
         const response: IResponse<any> | undefined = await request('/ctpslave/market/query', {
             method: 'get',
             params: {
-                instrument: instrumentId,
+                instrument: instrument.instrumentID,
                 tradingDay: tradingDay,
                 index: index,
             },
@@ -130,7 +133,7 @@ export const requestFuture = {
         // 格式化数据填充到chartData
         result.map((item) => {
             const actionTime = item[43];
-            let _index = getIndexByActionTime(instrumentId, actionTime, interval);
+            let _index = getIndexByActionTime(instrument.instrumentID, actionTime, interval);
             if (_index === undefined) {
                 return;
             }
@@ -148,7 +151,8 @@ export const requestFuture = {
             const tickVolume = Number(volume) - lastVolume;
             const openInterest = Number(item[15]);
             // 沉淀资金 持仓量*最新价*合约手数*保证金比例
-            const fund = openInterest * price;
+            // * instrumentDetail?.volumeMultiple * instrumentDetail?.longMarginRatio
+            const fund = openInterest * price * instrument.volumeMultiple * instrument.longMarginRatio;
             const orderBooks = {
                 bidPrice1: Number(item[23]),
                 bidVolume1: Number(item[24]),
@@ -216,13 +220,12 @@ export const requestFuture = {
     /**
      * 获取合约详细信息
      */
-    instrumentInfo: async (instrumentId: string, tradingDay: string) => {
+    instrumentInfo: async (instrumentId: string) => {
         const response: IResponse<InstrumentModel> | undefined = await request('/ctpslave/market/instrument/info',
             {
                 method: 'get',
                 params: {
-                    instrument: instrumentId,
-                    tradingDay: tradingDay,
+                    instrument: instrumentId
                 },
             },
         );
