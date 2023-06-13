@@ -149,6 +149,7 @@ export const requestFuture = {
             const price = Number(item[6]);
             const volume = Number(item[13]);
             const tickVolume = Number(volume) - lastVolume;
+            // 持仓量
             const openInterest = Number(item[15]);
             // 沉淀资金 持仓量*最新价*合约手数*保证金比例
             // * instrumentDetail?.volumeMultiple * instrumentDetail?.longMarginRatio

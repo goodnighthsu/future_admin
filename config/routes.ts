@@ -39,8 +39,13 @@ export default [
     },
     {
         path: '/',
-        redirect: '/instrument/trade',
+        redirect: '/welcome',
         access: 'routeFilter',
+    },
+    {
+        name: '首页',
+        path: '/welcome',
+        component: './Welcome/Welcome'
     },
     {
         name: '合约',
