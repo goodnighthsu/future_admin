@@ -98,12 +98,12 @@ export const requestFuture = {
      * @returns
      */
     marketList: async (
-        abortControllr: AbortController,
         chartData: IChartData,
         interval: number,
         instrument: InstrumentModel,
         tradingDay?: string,
         index?: number,
+        abortControllr?: AbortController,
     ) => {
         console.log(instrument);
 
@@ -115,7 +115,7 @@ export const requestFuture = {
                 tradingDay: tradingDay,
                 index: index,
             },
-            signal: abortControllr.signal,
+            signal: abortControllr?.signal,
         });
 
         if (!response?.data) {
@@ -221,17 +221,32 @@ export const requestFuture = {
     /**
      * 获取合约详细信息
      */
-    instrumentInfo: async (instrumentId: string) => {
+    instrumentInfo: async (instrumentId: string, abort?: AbortController) => {
         const response: IResponse<InstrumentModel> | undefined = await request('/ctpslave/market/instrument/info',
             {
                 method: 'get',
                 params: {
                     instrument: instrumentId
                 },
+                abortController: abort
             },
         );
 
         return response?.data;
+    },
+
+    period: async (instrument: string, interval: number, tradingDay: string) => {
+        const response: IResponse<string[]> | undefined = await request('/ctpslave/market/instrument/period',
+            {
+                method: 'get',
+                params: {
+                    instrument: instrument,
+                    tradingDay: tradingDay,
+                    interval: interval,
+                }
+            }
+        );
+
+        return response?.data;
     }
-        
 };

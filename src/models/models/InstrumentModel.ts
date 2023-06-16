@@ -1,4 +1,3 @@
-import config from 'config/config';
 import moment from 'moment';
 
 /**
@@ -89,6 +88,16 @@ export interface IChartData {
     funds: number[];
     // 5档盘口
     orderBooks: IOrderBook[];
+}
+
+/**
+ * K线图
+ */
+export interface IChartKLine {
+    // 时间轴
+    times: string[];
+    // open close lowest highest
+    values: number[];
 }
 
 /**
