@@ -98,6 +98,10 @@ export interface IChartKLine {
     times: string[];
     // open close lowest highest
     values: number[];
+    // tick volume
+    tickVolumes: number[];
+    // 持仓量
+    openInterests: number[];
 }
 
 /**

@@ -5,6 +5,10 @@ import styles from './MarketList.less';
 
 export const createChart = (instrument: string | undefined, interval: number, chartData: IChartData | undefined) => {
     const element = document.getElementById('eChart');
+    const oldChart =  ECharts.getInstanceByDom(element as HTMLDivElement);
+    if (oldChart) {
+        oldChart.dispose();
+    }
     const chart = ECharts.init(element as HTMLDivElement);
 
     // 提示栏
@@ -302,6 +306,10 @@ export const createChart = (instrument: string | undefined, interval: number, ch
     return chart;
 };
 
+enum SeriesName {
+    kLine = 'kLine',
+    tickVolume = 'tickVolume',
+}
 
 /**
  * k线图
@@ -312,9 +320,11 @@ export const createChart = (instrument: string | undefined, interval: number, ch
  */
 export const createKLine = (instrument: string | undefined, interval: number, chartData: IChartKLine | undefined) => {
     const element = document.getElementById('eChart');
+    const oldChart =  ECharts.getInstanceByDom(element as HTMLDivElement);
+    if (oldChart) {
+        oldChart.dispose();
+    }
     const chart = ECharts.init(element as HTMLDivElement);
-
-    console.log('kline', chartData);
 
     const tooltip = {
         show: true,
@@ -333,22 +343,23 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 return [];
             }
 
-            let obj = undefined;
+            // k线
+            let kLine = undefined;
             for (let i = 0; i < params.length; i++) {
                 const item = params[i];
-                if (item.axisType == 'xAxis.category') {
-                    obj = item;
+                if (item.seriesName ===  SeriesName.kLine) {
+                    kLine = item;
                     break;
                 }
             }
 
-            if (obj === undefined) {
+            if (kLine === undefined) {
                 return [];
             }
 
         
             // time html
-            const {axisValue, value} = obj;
+            const {axisValue, value} = kLine;
             const timeHtmls = [
                 '<div style="display:flex;flex-direction:column;justify-content:space-between;width:100%">',
                 '<div style="display:flex;flex-direction:row;justify-content:space-between"><div>Time: </div> ' +
@@ -356,16 +367,16 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                     '</div>',
             ];
 
-            if (!chartData) {
+            if (!chartData || !value) {
                 return;
             }
-
             
             const openPrice = value[1];
             const closePrice = value[2];
             const lowestPrice = value[3];
             const highestPrice = value[4];
-
+            const tickVolume = value[5];
+            const openIntereset = value[6];
 
             const infoCell = (tip: string, value: string | number | undefined) => {
                 return '<div style="display:flex; flex-direction:row;justify-content:space-between">' +
@@ -377,10 +388,12 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
             const positionHtmls = [
                 '<div style="height: 8px"></div>',
                 '<div style="height: 8px"></div>',
-                infoCell('Open Price', openPrice),
-                infoCell('Close Price', closePrice),
-                infoCell('Lowest Price', lowestPrice),
-                infoCell('Highest Price', highestPrice),
+                infoCell('开盘价', openPrice),
+                infoCell('最高价', highestPrice),
+                infoCell('最低价', lowestPrice),
+                infoCell('收盘价', closePrice),
+                infoCell('成交', tickVolume),
+                infoCell('持仓',openIntereset),
             ];
 
             // tool tip
@@ -423,12 +436,42 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 data: chartData?.times,
             },
         ],
-        yAxis: {
-            scale: true,
-            splitArea: {
-                show: true,
-            }
-        },
+        yAxis: [
+            {
+                // k线
+                scale: true,
+                splitArea: {
+                    show: true
+                }
+            },
+            {
+                // 成交量
+                type: 'value',
+                min: 0,
+                max: 'dataMax',
+                axisLabel: { show: true },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisPointer: {
+                    show: true,
+                },
+            },
+            {
+                // 持仓量
+                type: 'value',
+                min: 'dataMin',
+                max: 'dataMax',
+                axisLabel: {
+                    formatter: (value: number) => {
+                        return value;
+                    },
+                },
+                axisPointer: {
+                    show: false,
+                },
+            },
+        ],
         tooltip: tooltip,
         dataZoom: [
             {
@@ -437,15 +480,54 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 end: 100,
                 zoomOnMouseWheel: true,
             },
+            {
+                type: 'slider',
+                xAxisIndex: [0],
+                start: 0,
+                end: 100,
+                filterMode: 'weakFilter',
+                zoomOnMouseWheel: true,
+            },
 
         ],
         series: [
             {
                 // K线图
                 index: 0,
-                name: 'K线图',
+                name: SeriesName.kLine,
                 type: 'candlestick',
-                data: chartData?.values,
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+            },
+            {
+                // 成交量
+                index: 1,
+                name: SeriesName.tickVolume,
+                type: 'bar',
+                xAxisIndex: 0,
+                yAxisIndex: 1,
+                itemStyle: {
+                    color: 'black',
+                },
+            },
+            {
+                // 持仓量
+                index: 2,
+                name: 'openInterest',
+                type: 'line',
+                xAxisIndex: 0,
+                yAxisIndex: 2,
+                symbol: 'arrow',
+                lineStyle: {
+                    width: 1,
+                },
+                emphasis: {
+                    lineStyle: {
+                        width: 1,
+                    },
+                },
+                showSymbol: false,
+                connectNulls: true,
             }
         ],
     };

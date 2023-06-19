@@ -15,7 +15,7 @@ import styles from './MarketList.less';
 
 const MarketList: React.FC = (props) => {
     // MARK: - ----------------- state-----------------
-
+    const [periodSelected, setPeriodSelected] = useState<string>('TK');
     const [tradingDay, setTradingDay] = useState<moment.Moment | null>(moment());
     // 所有合约id
     const [instrumentIds, setInstrumentsIds] = useState<string[]>([]);
@@ -81,13 +81,18 @@ const MarketList: React.FC = (props) => {
         const kLine: IChartKLine = {
             times: [],
             values: [],
+            tickVolumes: [],
+            openInterests: [],
         };
         response?.forEach(item  => {
             kLine.times.push(item.tradingActionTime);
-            kLine.values.push([item.openPrice, item.closePrice, item.lowestPrice, item.highestPrice])
-        })
+            kLine.values.push([item.openPrice, item.closePrice, item.lowestPrice, item.highestPrice, item.tickVolume, item.openInterest]);
+            kLine.tickVolumes.push(item.tickVolume);
+            kLine.openInterests.push(item.openInterest);
+        });
 
-        createKLine(instrument, 60 , kLine);
+        // createKLine(instrument, 60 , kLine);
+        return kLine;        
     }
 
     // MARK: - 加载合约行情数据 method
@@ -126,12 +131,12 @@ const MarketList: React.FC = (props) => {
         };
 
         // 更新chart
-        const chart = getChart();
-        chart?.setOption(
-            // 时间轴
-            { xAxis: { data: _chartData.times } },
-        );
-        chart?.showLoading();
+        // const chart = getChart();
+        // chart?.setOption(
+        //     // 时间轴
+        //     { xAxis: { data: _chartData.times } },
+        // );
+        // chart?.showLoading();
         requestFuture.marketList(
             _chartData,
             interval,
@@ -140,13 +145,14 @@ const MarketList: React.FC = (props) => {
             index,
             abort,
         ).then( response => {
-            chart?.hideLoading();
+            // chart?.hideLoading();
             if (!response) {
                 return;
             }
             
-            createChart(instrument.instrumentID, interval, response);
+            const chart = createChart(instrument.instrumentID, interval, response);
             chart?.setOption({
+                xAxis: { data: _chartData.times },
                 series: [
                     {
                         data: response.prices,
@@ -192,21 +198,16 @@ const MarketList: React.FC = (props) => {
     
 
     const clickPeriod = (period: string) => {
-        if (!instrumentRef.current || !tradingDay) {
-            return;
-        }
-        if (period === 'TK') {
-            loadData(instrumentRef.current, 500, tradingDay);
-            return;
-        }
-
-        loadPeriod(instrumentRef.current, 60, tradingDay);
+        // if (!instrumentRef.current || !tradingDay) {
+        //     return;
+        // }
+        setPeriodSelected(period);
     };
 
     // MARK: - --- effect ---
     // MARK: - effect init
     useEffect(() => {
-        createChart(instrumentRef.current, intervalRef.current, chartDataRef.current);
+        // createChart(instrumentRef.current, intervalRef.current, chartDataRef.current);
 
         // window resize event
         const resize = (window.onresize = () => {
@@ -241,6 +242,55 @@ const MarketList: React.FC = (props) => {
             abort.abort();
         };
     }, [instrumentSelected, tradingDay]);
+
+    useEffect(() => {
+        if (!instrumentSelected || !tradingDay) {
+            return;
+        }
+        if (periodSelected === 'TK') {
+            createChart(instrumentSelected, 60, chartDataRef.current)
+            loadData(instrumentSelected, 500, tradingDay);
+            return;
+        }
+
+        let period = 5;
+        if (periodSelected === '5s') {
+            period = 5;
+        } else if (periodSelected === '30s') {
+            period = 30;
+        }
+        else if (periodSelected === '1m') {
+            period = 60;
+        }
+        else if (periodSelected === '5m') {
+            period = 300;
+        }
+
+        console.log('periodSelected: ', periodSelected);
+        const chart = createKLine(instrumentSelected, period, chartDataRef.current);
+        (async () => {
+            const chartData = await loadPeriod(instrumentSelected, period, tradingDay);
+            console.log('chartData: ', chartData);
+            chart.setOption({
+                xAxis: { data: chartData?.times },
+                series: [
+                    {
+                        // K线图
+                        data: chartData?.values,
+                    },
+                    {
+                        // 成交量
+                        data: chartData?.tickVolumes,
+                    },
+                    {
+                        // 持仓量
+                        data: chartData?.openInterests,
+                    }
+                ],
+            })
+        })();
+    }, [periodSelected, instrumentSelected, tradingDay]);
+
 
     // MARK: - --- render ---
     return (
