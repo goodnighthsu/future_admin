@@ -3,7 +3,17 @@ import * as ECharts from 'echarts';
 import { isArray } from 'lodash';
 import styles from './MarketList.less';
 
-export const createChart = (instrument: string | undefined, interval: number) => {
+enum SeriesName {
+    price = 'price',
+    volume = 'volume',
+    tickVolume = 'tickVolume',
+    openInterest = 'openInterest',
+    fund = 'fund',
+    orderBook = 'orderBook',
+    kLine = 'kLine',
+}
+
+export const createChart = () => {
     const element = document.getElementById('eChart');
     const oldChart =  ECharts.getInstanceByDom(element as HTMLDivElement);
     if (oldChart) {
@@ -34,6 +44,9 @@ export const createChart = (instrument: string | undefined, interval: number) =>
                         return value;
                     },
                 },
+                splitArea: {
+                    show: true
+                },
             },
             {
                 // 成交量
@@ -50,22 +63,20 @@ export const createChart = (instrument: string | undefined, interval: number) =>
                 type: 'value',
                 min: 'dataMin',
                 max: 'dataMax',
-                axisLabel: {
-                    formatter: (value: number) => {
-                        return value;
-                    },
-                },
+                axisLabel: { show: false },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
             },
             {
                 // 沉淀资金
                 type: 'value',
                 min: 'dataMin',
                 max: 'dataMax',
-                axisLabel: {
-                    formatter: (value: number) => {
-                        return (value / 10000).toFixed(2) + '万';   
-                    },
-                },
+                axisLabel: { show: false },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
             },
         ],
         dataZoom: [
@@ -266,31 +277,7 @@ export const createChartTooltip = (instrument: string, interval: number, chartDa
     return tooltip;
 }
 
-enum SeriesName {
-    price = 'price',
-    volume = 'volume',
-    tickVolume = 'tickVolume',
-    openInterest = 'openInterest',
-    fund = 'fund',
-    orderBook = 'orderBook',
-    kLine = 'kLine',
-}
-
-/**
- * k线图
- * @param instrument 
- * @param interval 
- * @param chartData 
- * @returns 
- */
-export const createKLine = (instrument: string | undefined, interval: number, chartData: IChartData | undefined) => {
-    const element = document.getElementById('eChart');
-    const oldChart =  ECharts.getInstanceByDom(element as HTMLDivElement);
-    if (oldChart) {
-        oldChart.dispose();
-    }
-    const chart = ECharts.init(element as HTMLDivElement);
-
+const createKLineToolTip = () => {
     const tooltip = {
         show: true,
         trigger: 'axis',
@@ -322,7 +309,6 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 return [];
             }
 
-        
             // time html
             const {axisValue, value} = kLine;
             const timeHtmls = [
@@ -332,9 +318,9 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                     '</div>',
             ];
 
-            if (!chartData || !value) {
-                return;
-            }
+            // if (!chartData || !value) {
+            //     return;
+            // }
             
             const openPrice = value[1];
             const closePrice = value[2];
@@ -381,6 +367,24 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
             return obj;
         },
     };
+
+    return tooltip;
+}
+
+/**
+ * k线图
+ * @param instrument 
+ * @param interval 
+ * @returns 
+ */
+export const createKLine = () => {
+    const element = document.getElementById('eChart');
+    const oldChart =  ECharts.getInstanceByDom(element as HTMLDivElement);
+    if (oldChart) {
+        oldChart.dispose();
+    }
+    const chart = ECharts.init(element as HTMLDivElement);
+
    
     const option = {
         title: { text: '合约' },
@@ -392,13 +396,6 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 // 行情时间
                 type: 'category',
                 boundaryGap: false,
-                axisPointer: {
-                    show: true,
-                    label: {
-                        show: true,
-                    },
-                },
-                data: chartData?.times,
             },
         ],
         yAxis: [
@@ -407,9 +404,6 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 scale: true,
                 splitArea: {
                     show: true
-                },
-                axisPointer: {
-                    show: true,
                 },
             },
             {
@@ -421,26 +415,18 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
                 axisLine: { show: false },
                 axisTick: { show: false },
                 splitLine: { show: false },
-                axisPointer: {
-                    show: false,
-                },
             },
             {
                 // 持仓量
                 type: 'value',
                 min: 'dataMin',
                 max: 'dataMax',
-                axisLabel: {
-                    formatter: (value: number) => {
-                        return value;
-                    },
-                },
-                axisPointer: {
-                    show: false,
-                },
+                axisLabel: { show: false},
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
             },
         ],
-        tooltip: tooltip,
         dataZoom: [
             {
                 type: 'inside',
@@ -458,6 +444,7 @@ export const createKLine = (instrument: string | undefined, interval: number, ch
             },
 
         ],
+        tooltip: createKLineToolTip(),
         series: [
             {
                 // K线图

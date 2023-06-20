@@ -161,7 +161,7 @@ const MarketList: React.FC = (props) => {
             return;
         }
         if (periodSelected === 'TK') {
-            const chart = createChart(instrumentSelected, 60);
+            const chart = createChart();
             chart.showLoading();
             (async () => {
                
