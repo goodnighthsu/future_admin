@@ -1,7 +1,9 @@
 import {
     getIndexByActionTime,
+    getTimeByInstrument,
     IChartData,
     InstrumentModel,
+    IOrderBook,
     MarketData,
 } from '@/models/models/InstrumentModel';
 import request, { IResponse } from '@/utils/request';
@@ -90,23 +92,34 @@ export const requestFuture = {
     // MARK: - 获取合约交易日市场信息
     /**
      * 获取合约交易日市场信息
-     * @param abortControllr
-     * @param chartData
      * @param instrumentId
+     * @param interval
      * @param tradingDay
      * @param index
      * @returns
      */
     marketList: async (
-        chartData: IChartData,
-        interval: number,
         instrument: InstrumentModel,
+        interval: number,
         tradingDay?: string,
+        
         index?: number,
-        abortControllr?: AbortController,
     ) => {
-        console.log(instrument);
+        // 构建chart数据
+        const _times = getTimeByInstrument(instrument.instrumentID, interval);
+        if (!_times) {
+            return;
+        }
 
+        const chartData: IChartData = {
+            times: _times,
+            prices: new Array(_times.length),
+            tickVolumes: new Array(_times.length),
+            volumes: new Array(_times.length),
+            openInterests: new Array(_times.length),
+            funds: new Array(_times.length),
+            orderBooks: new Array(_times.length),
+        };
         //
         const response: IResponse<any> | undefined = await request('/ctpslave/market/query', {
             method: 'get',
@@ -114,8 +127,7 @@ export const requestFuture = {
                 instrument: instrument.instrumentID,
                 tradingDay: tradingDay,
                 index: index,
-            },
-            signal: abortControllr?.signal,
+            }
         });
 
         if (!response?.data) {
@@ -140,7 +152,7 @@ export const requestFuture = {
             
             // 返回数据没有区分0 250 500 750 毫秒，
             // 在tick 的interval是 250 或 500, index有数据时就放到下个index
-            if (chartData.prices[_index] !== undefined) {
+            if ((chartData.prices ?? [])[_index] !== undefined) {
                 if (interval === 500 || interval === 250) {
                     _index++;
                 }
@@ -152,9 +164,9 @@ export const requestFuture = {
             // 持仓量
             const openInterest = Number(item[15]);
             // 沉淀资金 持仓量*最新价*合约手数*保证金比例
-            // * instrumentDetail?.volumeMultiple * instrumentDetail?.longMarginRatio
+            // instrumentDetail?.volumeMultiple * instrumentDetail?.longMarginRatio
             const fund = openInterest * price * instrument.volumeMultiple * instrument.longMarginRatio;
-            const orderBooks = {
+            const orderBooks: IOrderBook = {
                 bidPrice1: Number(item[23]),
                 bidVolume1: Number(item[24]),
                 bidPrice2: Number(item[27]),
@@ -175,35 +187,35 @@ export const requestFuture = {
                 askVolume4: Number(item[38]),
                 askPrice5: Number(item[41]),
                 askVolume5: Number(item[42]),
-            }
+            };
             // 成交价
-            chartData.prices[_index] = price;
+            (chartData.prices ?? [])[_index] = price;
             // 成交量
-            chartData.tickVolumes[_index] = tickVolume;
-            chartData.volumes[_index] = volume;
+            (chartData.tickVolumes ?? [])[_index] = tickVolume;
+            (chartData.volumes ?? [])[_index] = volume;
             // 持仓量
-            chartData.openInterests[_index] = openInterest;
+            (chartData.openInterests ?? [])[_index] = openInterest;
             // 沉淀资金
-            chartData.funds[_index] = fund;
+            (chartData.funds ?? [])[_index] = fund;
             // 5档盘口 
-            chartData.orderBooks[_index] = orderBooks;
+            (chartData.orderBooks ?? [])[_index] = orderBooks;
 
             // 使用上一成交价格填充空白数据
             if (_index - lastIndex > 1) {
                 if (lastIndex === 0) {
-                    chartData.prices.fill(price, lastIndex, _index);
-                    chartData.volumes.fill(volume, lastIndex, _index);
-                    chartData.tickVolumes.fill(0, lastIndex, _index);
-                    chartData.openInterests.fill(openInterest, lastIndex, _index);
-                    chartData.funds.fill(fund, lastIndex, _index);
-                    chartData.orderBooks.fill(orderBooks, lastIndex, _index);
+                    chartData.prices?.fill(price, lastIndex, _index);
+                    chartData.volumes?.fill(volume, lastIndex, _index);
+                    chartData.tickVolumes?.fill(0, lastIndex, _index);
+                    chartData.openInterests?.fill(openInterest, lastIndex, _index);
+                    chartData.funds?.fill(fund, lastIndex, _index);
+                    chartData.orderBooks?.fill(orderBooks, lastIndex, _index);
                 }else {
-                    chartData.prices.fill(lastPrice, lastIndex+1, _index);
-                    chartData.volumes.fill(lastVolume, lastIndex+1, _index);
-                    chartData.tickVolumes.fill(0, lastIndex+1, _index);
-                    chartData.openInterests.fill(lastOpenInterest, lastIndex+1, _index);
-                    chartData.funds.fill(lastFund, lastIndex+1, _index);
-                    chartData.orderBooks.fill(lastOrderBook, lastIndex+1, _index);
+                    chartData.prices?.fill(lastPrice, lastIndex+1, _index);
+                    chartData.volumes?.fill(lastVolume, lastIndex+1, _index);
+                    chartData.tickVolumes?.fill(0, lastIndex+1, _index);
+                    chartData.openInterests?.fill(lastOpenInterest, lastIndex+1, _index);
+                    chartData.funds?.fill(lastFund, lastIndex+1, _index);
+                    chartData.orderBooks?.fill(lastOrderBook, lastIndex+1, _index);
                 }
             }
 

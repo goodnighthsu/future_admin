@@ -1,8 +1,7 @@
 import { InstrumentModel } from '@/models/InstrumentListState';
 import {
     getTimeByInstrument,
-    IChartData,
-    IChartKLine,
+    IChartData
 } from '@/models/models/InstrumentModel';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { PageContainer } from '@ant-design/pro-components';
@@ -10,7 +9,7 @@ import { Button, DatePicker, Select } from 'antd';
 import * as ECharts from 'echarts';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, createKLine } from './EChart';
+import { createChart, createChartTooltip, createKLine } from './EChart';
 import styles from './MarketList.less';
 
 const MarketList: React.FC = (props) => {
@@ -26,7 +25,7 @@ const MarketList: React.FC = (props) => {
     // 合约详情
     const [info, setInfo] = useState<InstrumentModel>();
     // 合约市场数据
-    const chartDataRef = useRef<IChartData | undefined>();
+    const chartDataRef = useRef<IChartData>({});
 
     // MARK: - --- methods ---
     /**
@@ -57,18 +56,13 @@ const MarketList: React.FC = (props) => {
         return response;
     }
 
-    const loadData = (instrument: string, interval: number, tradingDay: moment.Moment) => {
-        const abort = new AbortController();
+    const loadData = async (instrument: string, interval: number, tradingDay: moment.Moment) => {
         // 合约详情
-        loadInfo(instrument, abort).then( info => {
-            if (!info) {
-                return;
-            }
-
-            load(info, interval, tradingDay, undefined, abort);
-        });
-
-        return abort;
+        const info = await loadInfo(instrument);
+        if (!info) {
+            return;
+        }
+        return load(info, interval, tradingDay, undefined);
     }
 
     const loadPeriod = async(instrument: string, interval: number, tradingDay: moment.Moment) => {
@@ -78,7 +72,7 @@ const MarketList: React.FC = (props) => {
             return;
         }
 
-        const kLine: IChartKLine = {
+        const kLine: IChartData = {
             times: [],
             values: [],
             tickVolumes: [],
@@ -86,12 +80,11 @@ const MarketList: React.FC = (props) => {
         };
         response?.forEach(item  => {
             kLine.times.push(item.tradingActionTime);
-            kLine.values.push([item.openPrice, item.closePrice, item.lowestPrice, item.highestPrice, item.tickVolume, item.openInterest]);
+            (kLine.values ?? []).push([item.openPrice, item.closePrice, item.lowestPrice, item.highestPrice, item.tickVolume, item.openInterest]);
             kLine.tickVolumes.push(item.tickVolume);
             kLine.openInterests.push(item.openInterest);
         });
 
-        // createKLine(instrument, 60 , kLine);
         return kLine;        
     }
 
@@ -102,7 +95,6 @@ const MarketList: React.FC = (props) => {
      * @param interval
      * @param tradingDay
      * @param index
-     * @param abort
      * @returns
      */
     const load = async (
@@ -110,70 +102,17 @@ const MarketList: React.FC = (props) => {
         interval: number,
         tradingDay?: moment.Moment,
         index?: number,
-        abort?: AbortController,
     ) => {
         const _tradingDay = tradingDay?.format('YYYYMMDD');
 
-        // 构建chart数据
-        const _times = getTimeByInstrument(instrument.instrumentID, interval);
-        if (!_times) {
-            return;
-        }
-
-        const _chartData: IChartData = {
-            times: _times,
-            prices: new Array(_times.length),
-            tickVolumes: new Array(_times.length),
-            volumes: new Array(_times.length),
-            openInterests: new Array(_times.length),
-            funds: new Array(_times.length),
-            orderBooks: new Array(_times.length),
-        };
-
-        // 更新chart
-        // const chart = getChart();
-        // chart?.setOption(
-        //     // 时间轴
-        //     { xAxis: { data: _chartData.times } },
-        // );
-        // chart?.showLoading();
-        requestFuture.marketList(
-            _chartData,
-            interval,
+        const response = await requestFuture.marketList(
             instrument,
+            interval,
             _tradingDay,
             index,
-            abort,
-        ).then( response => {
-            // chart?.hideLoading();
-            if (!response) {
-                return;
-            }
-            
-            const chart = createChart(instrument.instrumentID, interval, response);
-            chart?.setOption({
-                xAxis: { data: _chartData.times },
-                series: [
-                    {
-                        data: response.prices,
-                    },
-                    {
-                        data: response.tickVolumes,
-                    },
-                    {
-                        data: response.openInterests,
-                    },
-                    {
-                        data: response.funds
-                    }
-                ],
-            });
-            //
-            chartDataRef.current = response;
-        });
-        
+        );
 
-        return abort;
+        return response;
     };
 
     // MARK: - 获取交易日合约列表 method
@@ -191,24 +130,13 @@ const MarketList: React.FC = (props) => {
         setInstrumentsIds(response);
     };
 
-    // MARK: --- echart init ---
-    /**
-     * 创建echart
-     */
-    
-
     const clickPeriod = (period: string) => {
-        // if (!instrumentRef.current || !tradingDay) {
-        //     return;
-        // }
         setPeriodSelected(period);
     };
 
     // MARK: - --- effect ---
     // MARK: - effect init
     useEffect(() => {
-        // createChart(instrumentRef.current, intervalRef.current, chartDataRef.current);
-
         // window resize event
         const resize = (window.onresize = () => {
             const chart = getChart();
@@ -228,28 +156,40 @@ const MarketList: React.FC = (props) => {
     }, [tradingDay]);
 
     // MARK: - effect 构建chart数据
-    /**
-     * 选择合约加载市场行情
-     */
-    useEffect(() => {
-        instrumentRef.current = instrumentSelected;
-        if (!instrumentSelected || !tradingDay) {
-            return;
-        }        
-       
-        const abort = loadData(instrumentSelected, intervalRef.current, tradingDay);
-        return () => {
-            abort.abort();
-        };
-    }, [instrumentSelected, tradingDay]);
-
     useEffect(() => {
         if (!instrumentSelected || !tradingDay) {
             return;
         }
         if (periodSelected === 'TK') {
-            createChart(instrumentSelected, 60, chartDataRef.current)
-            loadData(instrumentSelected, 500, tradingDay);
+            const chart = createChart(instrumentSelected, 60);
+            chart.showLoading();
+            (async () => {
+               
+                const chartData = await loadData(instrumentSelected, 500, tradingDay);
+                if (!chartData) {
+                    return;
+                }
+                const toolTip = createChartTooltip(instrumentSelected, 500, chartData);
+                chart.setOption({
+                    xAxis: {data:  chartData?.times},
+                    tooltip: toolTip,
+                    series: [
+                        {
+                            data: chartData?.prices
+                        },
+                        {
+                            data: chartData?.tickVolumes
+                        },
+                        {
+                            data: chartData?.openInterests
+                        },
+                        {
+                            data: chartData?.funds
+                        },
+                    ]
+                });
+                chart.hideLoading();
+            })();
             return;
         }
 
@@ -265,12 +205,11 @@ const MarketList: React.FC = (props) => {
         else if (periodSelected === '5m') {
             period = 300;
         }
-
-        console.log('periodSelected: ', periodSelected);
-        const chart = createKLine(instrumentSelected, period, chartDataRef.current);
+        const chart = createKLine(instrumentSelected, period, chartDataRef);
+        chart.showLoading();
         (async () => {
             const chartData = await loadPeriod(instrumentSelected, period, tradingDay);
-            console.log('chartData: ', chartData);
+            chartDataRef.current = chartData;
             chart.setOption({
                 xAxis: { data: chartData?.times },
                 series: [
@@ -287,7 +226,8 @@ const MarketList: React.FC = (props) => {
                         data: chartData?.openInterests,
                     }
                 ],
-            })
+            });
+            chart.hideLoading();
         })();
     }, [periodSelected, instrumentSelected, tradingDay]);
 

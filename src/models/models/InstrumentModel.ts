@@ -74,34 +74,38 @@ export interface InstrumentModel {
  * 合约echart显示数据
  */
 export interface IChartData {
-    // 时间轴
-    times: string[];
-    // 价格
-    prices: number[];
-    // 成交量
-    volumes: number[];
-    // tick volume:
-    tickVolumes: number[];
-    // 持仓量
-    openInterests: number[];
-    // 沉淀资金 = 持仓量*最新价*合约手数*保证金比例
-    funds: number[];
-    // 5档盘口
-    orderBooks: IOrderBook[];
-}
-
-/**
- * K线图
- */
-export interface IChartKLine {
-    // 时间轴
-    times: string[];
-    // open close lowest highest
-    values: number[];
-    // tick volume
-    tickVolumes: number[];
-    // 持仓量
-    openInterests: number[];
+    /**
+     * 时间轴
+     */
+    times?: string[];
+    /**
+     * 价格
+     */
+    prices?: number[];
+    /**
+     * 累计成交量
+     */
+    volumes?: number[];
+    /**
+     * tick volume:
+     */
+    tickVolumes?: number[];
+    /**
+     * 持仓量
+     */
+    openInterests?: number[];
+    /**
+     * 沉淀资金 = 持仓量*最新价*合约手数*保证金比例
+     */
+    funds?: number[];
+    /**
+     * 5档盘口
+     */
+    orderBooks?: IOrderBook[];
+    /**
+     * k线 [开盘价, 最高价, 最低价, 收盘价]
+     */
+    values?: number[];
 }
 
 /**
