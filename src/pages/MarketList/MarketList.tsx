@@ -1,14 +1,11 @@
 import { InstrumentModel } from '@/models/InstrumentListState';
-import {
-    getTimeByInstrument,
-    IChartData
-} from '@/models/models/InstrumentModel';
+import { IChartData } from '@/models/models/InstrumentModel';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { PageContainer } from '@ant-design/pro-components';
 import { Button, DatePicker, Select } from 'antd';
 import * as ECharts from 'echarts';
 import moment from 'moment';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createChart, createChartTooltip, createKLine } from './EChart';
 import styles from './MarketList.less';
 
@@ -20,12 +17,8 @@ const MarketList: React.FC = (props) => {
     const [instrumentIds, setInstrumentsIds] = useState<string[]>([]);
     //
     const [instrumentSelected, setInstrumentSelected] = useState<string | undefined>();
-    const instrumentRef = useRef<string | undefined>();
-    const intervalRef = useRef<number>(500);
     // 合约详情
     const [info, setInfo] = useState<InstrumentModel>();
-    // 合约市场数据
-    const chartDataRef = useRef<IChartData>({});
 
     // MARK: - --- methods ---
     /**
@@ -205,11 +198,10 @@ const MarketList: React.FC = (props) => {
         else if (periodSelected === '5m') {
             period = 300;
         }
-        const chart = createKLine(instrumentSelected, period, chartDataRef);
+        const chart = createKLine();
         chart.showLoading();
         (async () => {
             const chartData = await loadPeriod(instrumentSelected, period, tradingDay);
-            chartDataRef.current = chartData;
             chart.setOption({
                 xAxis: { data: chartData?.times },
                 series: [
