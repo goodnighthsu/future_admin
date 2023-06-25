@@ -277,7 +277,7 @@ export const createChartTooltip = (instrument: string, interval: number, chartDa
     return tooltip;
 }
 
-const createKLineToolTip = () => {
+export const createKLineToolTip = () => {
     const tooltip = {
         show: true,
         trigger: 'axis',
@@ -299,7 +299,7 @@ const createKLineToolTip = () => {
             let kLine = undefined;
             for (let i = 0; i < params.length; i++) {
                 const item = params[i];
-                if (item.seriesName === SeriesName.kLine) {
+                if (item.seriesName === 'K线') {
                     kLine = item;
                     break;
                 }
@@ -310,17 +310,13 @@ const createKLineToolTip = () => {
             }
 
             // time html
-            const {axisValue, value} = kLine;
+            const {axisValue, value = []} = kLine ?? {};
             const timeHtmls = [
                 '<div style="display:flex;flex-direction:column;justify-content:space-between;width:100%">',
                 '<div style="display:flex;flex-direction:row;justify-content:space-between"><div>Time: </div> ' +
                 axisValue +
                     '</div>',
             ];
-
-            // if (!chartData || !value) {
-            //     return;
-            // }
             
             const openPrice = value[1];
             const closePrice = value[2];
@@ -449,7 +445,7 @@ export const createKLine = () => {
             {
                 // K线图
                 index: 0,
-                name: SeriesName.kLine,
+                name:  'K线',
                 type: 'candlestick',
                 xAxisIndex: 0,
                 yAxisIndex: 0,
@@ -457,7 +453,7 @@ export const createKLine = () => {
             {
                 // 成交量
                 index: 1,
-                name: SeriesName.tickVolume,
+                name: '成交量',
                 type: 'bar',
                 xAxisIndex: 0,
                 yAxisIndex: 1,
@@ -468,7 +464,7 @@ export const createKLine = () => {
             {
                 // 持仓量
                 index: 2,
-                name: 'openInterest',
+                name: '持仓量',
                 type: 'line',
                 xAxisIndex: 0,
                 yAxisIndex: 2,

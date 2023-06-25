@@ -2,7 +2,7 @@ import { InstrumentModel } from '@/models/InstrumentListState';
 import { IChartData } from '@/models/models/InstrumentModel';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, DatePicker, Select } from 'antd';
+import { DatePicker, Radio, Select } from 'antd';
 import * as ECharts from 'echarts';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -123,10 +123,6 @@ const MarketList: React.FC = (props) => {
         setInstrumentsIds(response);
     };
 
-    const clickPeriod = (period: string) => {
-        setPeriodSelected(period);
-    };
-
     // MARK: - --- effect ---
     // MARK: - effect init
     useEffect(() => {
@@ -191,14 +187,19 @@ const MarketList: React.FC = (props) => {
             period = 5;
         } else if (periodSelected === '30s') {
             period = 30;
-        }
-        else if (periodSelected === '1m') {
+        } else if (periodSelected === '1m') {
             period = 60;
-        }
-        else if (periodSelected === '5m') {
+        } else if (periodSelected === '5m') {
             period = 300;
+        } else if (periodSelected === '15m') {
+            period = 60 * 15;
+        } else if (periodSelected === '1h') {
+            period = 60 * 60;
         }
         const chart = createKLine();
+        chart.on('datazoom', (params) => {
+            console.log('datazoom:', params);
+        });
         chart.showLoading();
         (async () => {
             const chartData = await loadPeriod(instrumentSelected, period, tradingDay);
@@ -218,6 +219,10 @@ const MarketList: React.FC = (props) => {
                         data: chartData?.openInterests,
                     }
                 ],
+                dataZoom: {
+                    start: 80,
+                    end: 100,
+                }
             });
             chart.hideLoading();
         })();
@@ -250,13 +255,13 @@ const MarketList: React.FC = (props) => {
                     <span>到期日期：</span>{info?.expireDate}
                 </div>
                 <div className={styles.period}>
-                    {
-                        ['TK', '5s', '30s', '1m', '5m'].map((item) => {
-                            return <Button key={item} type='link'
-                                onClick={() => clickPeriod(item)}
-                            >{item}</Button>
-                        })
-                    }
+                    <Radio.Group value= {periodSelected} onChange={(e) => setPeriodSelected(e.target.value)}>
+                        {
+                            ['TK', '5s', '30s', '1m', '5m', '15m', '1h'].map((item) => {
+                                return <Radio.Button value={item}>{item}</Radio.Button>
+                            })
+                        }
+                    </Radio.Group>
                 </div>
                 <div id="eChart" className={styles.chart}></div>
             </div>
