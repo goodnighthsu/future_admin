@@ -6,6 +6,7 @@ import {
     IOrderBook,
     MarketData,
 } from '@/models/models/InstrumentModel';
+import { TradingModel } from '@/models/models/TradingModel';
 import request, { IResponse } from '@/utils/request';
 
 export const requestFuture = {
@@ -247,6 +248,13 @@ export const requestFuture = {
         return response?.data;
     },
 
+    /**
+     * k线数据
+     * @param instrument 合约
+     * @param interval 时间间隔
+     * @param tradingDay 交易日
+     * @returns 
+     */
     period: async (instrument: string, interval: number, tradingDay: string) => {
         const response: IResponse<string[]> | undefined = await request('/ctpslave/market/instrument/period',
             {
@@ -256,6 +264,20 @@ export const requestFuture = {
                     tradingDay: tradingDay,
                     interval: interval,
                 }
+            }
+        );
+
+        return response?.data;
+    },
+    
+    /**
+     * 实时行情
+     */
+    quote: async () => {
+        const response: IResponse<TradingModel[]> | undefined = await request(
+            '/ctpslave/market/instrument/quotes',
+            {
+                method: 'get'
             }
         );
 

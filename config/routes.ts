@@ -48,6 +48,11 @@ export default [
         component: './Welcome/Welcome'
     },
     {
+        name: 'Quote',
+        path: '/instrument/quote',
+        component: './QuoteList/QuoteList',
+    },
+    {
         name: '合约',
         path: '/instrument/trade',
         component: './InstrumentList/InstrumentList',
