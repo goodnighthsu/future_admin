@@ -56,6 +56,7 @@ export default {
     'menu.Account Manage.System Log': '系统日志',
 
     'menu.合约': '合约',
+    'menu.Quote List': '行情',
     'menu.Instrument Manage': 'Instrument Manage',
     'menu.Market Manage': 'Market Manage',
     'menu.Market': 'Market',

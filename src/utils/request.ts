@@ -14,6 +14,22 @@ export interface IResponse<T> {
     total?: number;
 }
 
+export const CreateByResponse = <T, R>(type: (new () => T), response?: IResponse<R>) => {
+    if (!response) {
+        return null;
+    }
+    const {data} = response;
+    if (Array.isArray(data)) {
+        return data.map(item => {
+            const obj = new type() as Object;
+            return Object.assign(obj, item);
+        });
+    }
+
+    return Object.assign(new type() as Object, data);
+
+}
+
 export interface IPagingResponse<T> {
     code: ResposneCode; //
     message: string;
@@ -81,7 +97,7 @@ const errorHandler = (error: {
 const request = extend({
     errorHandler,
     credentials: 'include',
-    timeout: 30000,
+    timeout: 6000,
 });
 
 request.interceptors.request.use((url, options) => {

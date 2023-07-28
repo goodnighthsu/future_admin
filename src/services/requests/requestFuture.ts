@@ -6,8 +6,8 @@ import {
     IOrderBook,
     MarketData,
 } from '@/models/models/InstrumentModel';
-import { TradingModel } from '@/models/models/TradingModel';
-import request, { IResponse } from '@/utils/request';
+import { ITradingModel, TradingModel } from '@/models/models/TradingModel';
+import request, { CreateByResponse, getResponseData, IResponse } from '@/utils/request';
 
 export const requestFuture = {
     // MARK: - 获取交易日合约分页列表 
@@ -256,14 +256,15 @@ export const requestFuture = {
      * @returns 
      */
     period: async (instrument: string, interval: number, tradingDay: string) => {
-        const response: IResponse<string[]> | undefined = await request('/ctpslave/market/instrument/period',
+        const response: IResponse<TradingModel[]> | undefined = await request('/ctpslave/market/instrument/period',
             {
                 method: 'get',
                 params: {
                     instrument: instrument,
                     tradingDay: tradingDay,
                     interval: interval,
-                }
+                },
+                timeout: 60000,
             }
         );
 
@@ -281,6 +282,6 @@ export const requestFuture = {
             }
         );
 
-        return response?.data;
+        return CreateByResponse(TradingModel, response);
     }
 };

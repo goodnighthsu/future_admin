@@ -43,12 +43,12 @@ export default [
         access: 'routeFilter',
     },
     {
-        name: '首页',
+        name: 'welcome',
         path: '/welcome',
         component: './Welcome/Welcome'
     },
     {
-        name: 'Quote',
+        name: 'Quote List',
         path: '/instrument/quote',
         component: './QuoteList/QuoteList',
     },

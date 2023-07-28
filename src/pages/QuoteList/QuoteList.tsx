@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageContainer } from "@ant-design/pro-components";
 import { Table } from "antd";
 import styles from './QuoteList.less';
@@ -17,18 +17,16 @@ const QuoteList:React.FC = (props) => {
     // state
     const [datas, setDatas] = useState<TradingModel[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-
-    const tableWrapRef = useRef<HTMLDivElement | null>(null);
+    const [contentHeight, setContentHeight] = useState<number>(tableHeight);
 
     // MARK: - --- methods ---
     // MARK: -  load 加载行情数据
     const load = async (keyword?: string, page?: number, pageSize?: number) => {
-        setLoading(true);
         const response = await requestFuture.quote();
-        setLoading(false);
         if (!response) {
             return;
         }
+
         setDatas(response ?? []);
     }    
 
@@ -52,9 +50,9 @@ const QuoteList:React.FC = (props) => {
         { title: '昨收盘', dataIndex: 'preClosePrice', width: 68},
         { title: '昨结算', dataIndex: 'preSettlementPrice', width: 68},
         { title: '行情更新时间', dataIndex: 'recvTime'},
-        { title: '接收延时 (ms)', key: 'recvDelay', width: 68,
+        { title: '接收延时 (ms)', key: 'recvDelay', width: 120,
             render: (item: TradingModel) => {
-                return new Date(item.recvTime).getTime() - new Date(item.tradingActionTime).getTime();
+                return new Date(item.recvTime ?? '').getTime() - new Date(item.tradingActionTime ?? '').getTime();
             },
         }
         // { title: '最小价位', dataIndex: 'instrumentID'},
@@ -71,15 +69,21 @@ const QuoteList:React.FC = (props) => {
         return () => {
             clearInterval(timer);
         };
-    }, [])
-
+    }, []);
+    
     // MARK: - render
     return (
         <PageContainer>
-            <div className={styles.page}>
-                <div className={styles.tableWrapper} ref={tableWrapRef}>
+            <div className={styles.page} 
+                ref={ (ref: HTMLDivElement) => {
+                    if (ref && ref.offsetHeight !== contentHeight) {
+                        setContentHeight(ref.offsetHeight);
+                    }
+                }}
+            >
+                <div className={styles.tableWrapper}>
                     <Table className={styles.table} size="small" dataSource={datas} columns={columns} bordered rowKey={'instrumentId'} pagination={false}
-                        scroll={{y: (tableWrapRef.current?.offsetHeight ?? tableHeight) - tableHeight,  x: 'max-content'}}
+                        scroll={{y: contentHeight ? contentHeight - tableHeight : tableHeight,  x: datas.length === 0 ? undefined : 'max-content'}}
                         loading={{delay: 300, spinning: loading}}/>
                 </div>
             </div>  
