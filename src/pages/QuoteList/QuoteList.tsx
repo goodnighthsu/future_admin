@@ -39,14 +39,54 @@ const QuoteList:React.FC = (props) => {
         { title: '买一量', dataIndex: 'bidVolume1', width: 68},
         { title: '卖一价', dataIndex: 'askPrice1', width: 68},
         { title: '卖一量', dataIndex: 'askVolume1', width: 68},
-        { title: '涨停价', dataIndex: 'upperLimitPrice', width: 68},
-        { title: '跌停价', dataIndex: 'lowerLimitPrice', width: 68},
-        // { title: '涨跌', dataIndex: 'instrumentID'},
-        // { title: '涨跌幅', dataIndex: 'instrumentID'},
+        { title: '涨停价', key: 'upperLimitPrice', width: 68,
+            render: (item: TradingModel) => {
+                return <div className={styles.red}>{item.upperLimitPrice}</div>
+            }
+        },
+        { title: '跌停价', key: 'lowerLimitPrice', width: 68, 
+            render: (item: TradingModel) => {
+                return <div className={styles.green}>{item.lowerLimitPrice}</div>
+            }
+        },
+        { title: '涨跌', key: 'changeRate', width: 68,
+            render: (item: TradingModel) => {
+                const {change, openPrice} = item;
+                return <div className={item.getChangeStyle(openPrice)}>{change}</div>
+            }
+        },
+        { title: '涨跌幅', key: 'changeRate', width: 68,
+            render: (item: TradingModel) => {
+                const {changeRate} = item;
+                let style = styles.yellow;
+                if (changeRate > 0 ) {
+                    style = styles.red;
+                }
+                if (changeRate < 0) {
+                    style = styles.green;
+                }
+                return <div className={style}>{changeRate}%</div>
+            }
+        },
         { title: '成交量', dataIndex: 'volume', width: 68},
-        { title: '今开盘', dataIndex: 'openPrice', width: 68},
-        { title: '最高价', dataIndex: 'highestPrice', width: 68},
-        { title: '最低价', dataIndex: 'lowestPrice', width: 68},
+        { title: '今开盘', key: 'openPrice', width: 68,
+            render: (item: TradingModel) => {
+                const {openPrice} = item;
+                return <div className={item.getChangeStyle(openPrice)}>{openPrice}</div>
+            }
+        },
+        { title: '最高价', key: 'highestPrice', width: 68,
+            render: (item: TradingModel) => {
+                const {highestPrice} = item;
+                return <div className={item.getChangeStyle(highestPrice)}>{highestPrice}</div>
+            }   
+        },
+        { title: '最低价', key: 'lowestPrice', width: 68,
+            render: (item: TradingModel) => {
+                const {lowestPrice} = item;
+                return <div className={item.getChangeStyle(lowestPrice)}>{lowestPrice}</div>
+            }
+        },
         { title: '昨收盘', dataIndex: 'preClosePrice', width: 68},
         { title: '昨结算', dataIndex: 'preSettlementPrice', width: 68},
         { title: '行情更新时间', dataIndex: 'recvTime'},
