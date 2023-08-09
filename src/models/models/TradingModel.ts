@@ -1,3 +1,5 @@
+import styles from '../../app.less';
+
 /**
  * 行情
  */
@@ -66,7 +68,6 @@ export class TradingModel {
     get lastPrice(): number {
         return Number(this._lastPrice?.toFixed(2));
     }
-
     set lastPrice(value: number) {
         this._lastPrice = value;
     }
@@ -74,7 +75,14 @@ export class TradingModel {
     /**
      * 昨结算价
      */
-    preSettlementPrice?: number;
+    _preSettlementPrice?: number;
+    get preSettlementPrice(): number {
+        return Number(this._preSettlementPrice?.toFixed(2))
+    }
+    set preSettlementPrice(value: number) {
+        this._preSettlementPrice = value;
+    }
+
 
     /**
      * 昨收盘价
@@ -202,7 +210,7 @@ export class TradingModel {
         this._bidPrice1 = value;
     }
     bidVolume1?: number;
-
+    
     _askPrice1?: number;
     get askPrice1(): number {
         return Number(this._askPrice1?.toFixed(2));
@@ -231,4 +239,35 @@ export class TradingModel {
     bidVolume5?: number;
     askPrice5?: number;
     askVolume5?: number;
+<<<<<<< HEAD
 }
+=======
+
+    /**
+     * 涨跌
+     */
+    get change(): number {
+        return Math.round((this.lastPrice - (this.preSettlementPrice ?? this.openPrice)) * 10000) / 10000;
+    }
+
+    /**
+     * 涨跌幅
+     */
+    get changeRate(): number {
+        return Math.round((this.change / (this.preSettlementPrice ?? this.openPrice)) * 10000) / 100;
+    }
+
+    /**
+     * 涨跌状态样式
+     */
+    getChangeStyle(value: number): any {
+        const _change = value - (this.preSettlementPrice ?? this.openPrice)
+        if ( _change > 0 ) {
+            return styles.red;
+        } else if ( _change < 0 ) {
+            return styles.green;
+        } 
+        return styles.yellow;
+    }
+}
+>>>>>>> 6bcc989aca406b0859c0c136ab4e1540723a7971
