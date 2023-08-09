@@ -239,9 +239,6 @@ export class TradingModel {
     bidVolume5?: number;
     askPrice5?: number;
     askVolume5?: number;
-<<<<<<< HEAD
-}
-=======
 
     /**
      * 涨跌
@@ -270,4 +267,3 @@ export class TradingModel {
         return styles.yellow;
     }
 }
->>>>>>> 6bcc989aca406b0859c0c136ab4e1540723a7971
