@@ -1,12 +1,9 @@
 import Footer from '@/components/Footer';
 import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import {
-  AlipayCircleOutlined,
   LockOutlined,
   MobileOutlined,
-  TaobaoCircleOutlined,
   UserOutlined,
-  WeiboCircleOutlined,
 } from '@ant-design/icons';
 import {
   LoginForm,
@@ -38,11 +35,12 @@ const Login: React.FC = () => {
   // state
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const [type, setType] = useState<string>('account');
+  const [color1] = useState<string>(Math.floor(Math.random()*16777215).toString(16));
+  const [color2] = useState<string>(Math.floor(Math.random()*16777215).toString(16));
 
   const { login } = useModel('AppState');
 
   const intl = useIntl();
-
   // methods
   const handleSubmit = async (values: API.LoginParams) => {
     const user = await login(values.username, values.password);
@@ -61,6 +59,7 @@ const Login: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.bg} style={{background: `linear-gradient(to right, #${color1}, #${color2}), #${color1}`}}></div>
       <div className={styles.lang} data-lang>
         {SelectLang && <SelectLang />}
       </div>
