@@ -19,7 +19,7 @@ export class TradingModel {
      * 发生时间
      * updateTime + update-Millisec
      */
-    actionTime?: string
+    actionTime?: string;
 
     /**
      * 合约代码
@@ -120,7 +120,7 @@ export class TradingModel {
         this._highestPrice = value;
     }
 
-     _lowestPrice?: number;
+    _lowestPrice?: number;
     /**
      * 最低价
      * @description 保留两位小数
@@ -194,7 +194,6 @@ export class TradingModel {
      */
     preTickVolume?: number;
 
-
     /**
      * 前一tick成交均价
      */
@@ -216,7 +215,6 @@ export class TradingModel {
     get askPrice1(): number {
         return Number(this._askPrice1?.toFixed(2));
     }
-
     set askPrice1(value: number) {
         this._askPrice1 = value;
     }
