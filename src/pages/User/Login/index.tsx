@@ -35,9 +35,6 @@ const Login: React.FC = () => {
   // state
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const [type, setType] = useState<string>('account');
-  const [color1] = useState<string>(Math.floor(Math.random()*16777215).toString(16));
-  const [color2] = useState<string>(Math.floor(Math.random()*16777215).toString(16));
-
   const { login } = useModel('AppState');
 
   const intl = useIntl();
@@ -59,10 +56,8 @@ const Login: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.bg} style={{background: `linear-gradient(to right, #${color1}, #${color2}), #${color1}`}}></div>
-      <div className={styles.lang} data-lang>
-        {SelectLang && <SelectLang />}
-      </div>
+      <div className={styles.bg}></div>
+      <div></div>
       <div className={styles.content}>
         <LoginForm
           logo={<img alt="logo" src="../logo.svg" />}
