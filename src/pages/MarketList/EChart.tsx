@@ -117,6 +117,7 @@ export const createChart = () => {
                 showSymbol: false,
                 connectNulls: true,
                 // sampling: 'lttb',    // 影响tooltip连续
+                animation: false,
             },
             {
                 // 成交量
@@ -130,6 +131,7 @@ export const createChart = () => {
                     color: 'black',
                 },
                 sampling: 'lttb',
+                animation: false,
             },
             {
                 // 持仓量
@@ -150,6 +152,7 @@ export const createChart = () => {
                 },
                 showSymbol: false,
                 connectNulls: true,
+                animation: false,
             },
             {
                 // 沉淀资金

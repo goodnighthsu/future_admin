@@ -103,16 +103,30 @@ export const requestFuture = {
         instrument: InstrumentModel,
         interval: number,
         tradingDay?: string,
-        
-        index?: number,
+        lastData?: IChartData,
+        abort?: AbortController,
     ) => {
         // 构建chart数据
         const _times = getTimeByInstrument(instrument.instrumentID, interval);
         if (!_times) {
             return;
         }
+        //
+        const response: IResponse<any> | undefined = await request('/ctpslave/market/query', {
+            method: 'get',
+            params: {
+                instrument: instrument.instrumentID,
+                tradingDay: tradingDay,
+                index: lastData?.index ?? 0,
+                signal: abort?.signal,
+            }
+        });
 
-        const chartData: IChartData = {
+        if (!response?.data) {
+            return undefined;
+        }
+
+        const chartData: IChartData = lastData ??  {
             times: _times,
             prices: new Array(_times.length),
             tickVolumes: new Array(_times.length),
@@ -121,19 +135,7 @@ export const requestFuture = {
             funds: new Array(_times.length),
             orderBooks: new Array(_times.length),
         };
-        //
-        const response: IResponse<any> | undefined = await request('/ctpslave/market/query', {
-            method: 'get',
-            params: {
-                instrument: instrument.instrumentID,
-                tradingDay: tradingDay,
-                index: index,
-            }
-        });
-
-        if (!response?.data) {
-            return undefined;
-        }
+        chartData.index = (lastData?.index ?? 0) + (response?.data?.length ?? 0);
 
         const datas: string[] = response?.data;
         const result: MarketData = datas.map((item) => item.split(','));
