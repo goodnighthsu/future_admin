@@ -334,9 +334,12 @@ export const getScheduleByInstrument = (instrument: string): string[] | undefine
         return schedule7;
     }
 
-    const matchs = instrument.match(/^\w{1,2}/);
+    let matchs = instrument.match(/^[a-zA-Z]{2}/);
     if (matchs?.length != 1) {
-        return undefined;
+        matchs = instrument.match(/^[a-zA-Z]/);
+        if (matchs?.length != 1) {
+            return undefined;
+        }
     }
     const code = matchs[0];
 
