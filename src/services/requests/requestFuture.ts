@@ -6,8 +6,8 @@ import {
     IOrderBook,
     MarketData,
 } from '@/models/models/InstrumentModel';
-import { ITradingModel, TradingModel } from '@/models/models/TradingModel';
-import request, { CreateByResponse, getResponseData, IResponse } from '@/utils/request';
+import { TradingModel } from '@/models/models/TradingModel';
+import request, { CreateByResponse, IResponse } from '@/utils/request';
 
 export const requestFuture = {
     // MARK: - 获取交易日合约分页列表 
@@ -93,17 +93,18 @@ export const requestFuture = {
     // MARK: - 获取合约交易日市场信息
     /**
      * 获取合约交易日市场信息
-     * @param instrumentId
-     * @param interval
-     * @param tradingDay
-     * @param index
-     * @returns
+     * @param instrument 合约
+     * @param interval tick 间隔
+     * @param tradingDay 交易日
+     * @param all 全部chart数据
+     * @param abort AbortController
+     * @returns 
      */
     marketList: async (
         instrument: InstrumentModel,
         interval: number,
         tradingDay?: string,
-        lastData?: IChartData,
+        all?: IChartData,
         abort?: AbortController,
     ) => {
         // 构建chart数据
@@ -117,16 +118,16 @@ export const requestFuture = {
             params: {
                 instrument: instrument.instrumentID,
                 tradingDay: tradingDay,
-                index: lastData?.index ?? 0,
-                signal: abort?.signal,
-            }
+                index: all?.index ?? 0,
+            },
+            signal: abort?.signal,
         });
 
         if (!response?.data) {
             return undefined;
         }
 
-        const chartData: IChartData = lastData ??  {
+        const chartData: IChartData = all ??  {
             times: _times,
             prices: new Array(_times.length),
             tickVolumes: new Array(_times.length),
@@ -135,16 +136,16 @@ export const requestFuture = {
             funds: new Array(_times.length),
             orderBooks: new Array(_times.length),
         };
-        chartData.index = (lastData?.index ?? 0) + (response?.data?.length ?? 0);
-
+        chartData.index = (all?.index ?? 0) + (response?.data?.length ?? 0);
         const datas: string[] = response?.data;
         const result: MarketData = datas.map((item) => item.split(','));
-        let lastPrice = 0
-        let lastVolume = 0;
-        let lastOpenInterest = 0;
-        let lastFund = 0;
-        let lastIndex = 0;
-        let lastOrderBook = {};
+        let lastIndex = chartData.lastIndex ?? 0;
+        let lastPrice = chartData.prices ? chartData.prices[lastIndex] : 0;
+        let lastVolume = chartData.volumes ? chartData.volumes[lastIndex] : 0;
+        let lastOpenInterest = chartData.openInterests ? chartData.openInterests[lastIndex] : 0;
+        let lastFund = chartData.funds ? chartData.funds[lastIndex] : 0;
+   
+        let lastOrderBook = chartData.orderBooks ? chartData.orderBooks[lastIndex] : {};
         // 格式化数据填充到chartData
         result.map((item) => {
             const actionTime = item[43];
@@ -229,6 +230,7 @@ export const requestFuture = {
             lastFund = fund;
             lastOrderBook = orderBooks;
         });
+        chartData.lastIndex = lastIndex;
         return chartData;
     },
 

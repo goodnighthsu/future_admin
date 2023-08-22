@@ -210,7 +210,6 @@ const MarketList: React.FC = (props) => {
 
     const tkView = async (instrument: InstrumentModel, tradingDay: Moment) => {
         abortRef.current?.abort();
-        console.log(abortRef.current);
         const chart = createChart();
         // chart.showLoading();
         timerRef.current = setInterval(async () => {

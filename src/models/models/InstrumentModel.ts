@@ -106,7 +106,16 @@ export interface IChartData {
      * k线 [开盘价, 最高价, 最低价, 收盘价]
      */
     values?: number[];
+    
+    /**
+     * 请求服务器数据的起始索引
+     */
     index?: number;
+
+    /**
+     * 最后有效数据
+     */
+    lastIndex?: number;
 }
 
 /**
