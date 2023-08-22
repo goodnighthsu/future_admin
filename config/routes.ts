@@ -63,6 +63,17 @@ export default [
         component: './MarketList/MarketList',
     },
     {
+        name: 'Tensor Flow',
+        path: '/tensorflow',
+        routes: [
+            {
+                name: 'Training Regression',
+                path: '/tensorflow/regression',
+                component: './TensorFlow/TrainingRegression/TrainingRegression',
+            }
+        ]
+    },
+    {
         name: 'Account Manage',
         path: '/account',
         access: 'routeFilter',

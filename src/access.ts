@@ -1,12 +1,12 @@
 import { StateEnum } from "./models/BaseModel";
-import { ISysPermissionModel } from "./models/SysRoleListState";
-import { ISysUserModel } from "./models/SysUserListState";
+import { SysPermissionModel } from "./models/SysRoleListState";
+import { SysUserModel } from "./models/SysUserListState";
 
 /**
  * @see https://umijs.org/zh-CN/plugins/plugin-access
  * */
 
-const getEnablePermission = (permissions: ISysPermissionModel[]): string[] => {
+const getEnablePermission = (permissions: SysPermissionModel[]): string[] => {
   let paths: string[] = [];
 
   permissions.forEach( permission => {
@@ -25,7 +25,7 @@ const getEnablePermission = (permissions: ISysPermissionModel[]): string[] => {
 }
 
 
-export default function access(initialState: { currentUser?: ISysUserModel } | undefined) {
+export default function access(initialState: { currentUser?: SysUserModel } | undefined) {
   const { currentUser } = initialState ?? {};
   let paths = getEnablePermission(currentUser?.permissions ?? []);
   paths = ['/', ...paths];
