@@ -58,7 +58,7 @@ const SysRoleAdd: React.FC<ISysRoleAdd> = (props) => {
     }, [title]);
 
     return (
-        <div className={styles.page}>
+        <div className={styles.popPage}>
             <div className={styles.cell}>
                 <div className={`${styles.cell_title} ${styles.need}`}>角色名:</div>
                 <Input prefix={<UserOutlined />} placeholder='Role name' value={title} onChange={changeTitle}/>

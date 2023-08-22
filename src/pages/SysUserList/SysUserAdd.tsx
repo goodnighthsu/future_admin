@@ -107,7 +107,7 @@ const SysUserAdd: React.FC<ISysUserAdd> = (props) => {
     }, [title, roleId, password, password2]);
 
     return (
-        <div className={styles.page}>
+        <div className={styles.popPage}>
             <div className={styles.cell}>
                 <div  className={styles.cell_item}>
                     <div className={`${styles.cell_title} ${styles.need}`}>账号:</div>
