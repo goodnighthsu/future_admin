@@ -98,6 +98,7 @@ const request = extend({
     errorHandler,
     credentials: 'include',
     timeout: 6000,
+
 });
 
 request.interceptors.request.use((url, options) => {
@@ -115,7 +116,7 @@ request.interceptors.request.use((url, options) => {
         };
     }
     return config;
-});
+}, { global: false });
 
 const myErrorHandler = async (response: Response, options: any) => {
     if (response.status >= 400) {
@@ -159,6 +160,6 @@ const myErrorHandler = async (response: Response, options: any) => {
  */
 request.interceptors.response.use(async (response, options) => {
     return myErrorHandler(response, options);
-});
+}, { global: false });
 
 export default request;
