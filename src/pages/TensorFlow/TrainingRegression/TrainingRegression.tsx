@@ -1,12 +1,16 @@
 import tensorRequest from '@/utils/tensorRequest';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tf from '@tensorflow/tfjs';
+import { Button } from 'antd';
+
 const TrainingRegression: React.FC = (props) => {
+    const [data, setData] = useState([]);
+    const [tensorData, setTensorData] = useState<any>();
+    const [model, setModel] = useState();
     
     // methods
     const load = async () => {
-        console.log('load');
         const response = await tensorRequest('https://storage.googleapis.com/tfjs-tutorials/carsData.json', {
             method: 'GET',
         });
@@ -20,34 +24,49 @@ const TrainingRegression: React.FC = (props) => {
         return cleaned;
     }
 
-    const run = async() => {
-        const data = await load();
-        const values= data.map( (item: any) => {
+    const loadData = async () => {
+        const _data = await load();
+        setData(_data);
+        const _tensorData = convertToTensor(_data);
+        console.log('data', _data);
+        console.log('tensorData', _tensorData);
+        setTensorData(_tensorData);
+
+        const values= _data.map( (item: any) => {
             return {x: item.horsepower, y: item.mpg}
         });
 
-        tfvis.render.scatterplot(
+        // render
+        await tfvis.render.scatterplot(
             {name: 'Horsepower v MPG'},
             {values},
             {xLabel: 'Horsepower', yLabel: 'MPG', height: 300}
         );
+        tfvis.visor().open();
+    }
 
-        const model = createModel();
-        tfvis.show.modelSummary({name: 'Model Summary'}, model);
-
-        const tensorData = convertToTensor(data);
-        const {inputs, labels} = tensorData;
-
-        await trainModel(model, inputs, labels);
-        console.log('Done Training');
+    const run = async() => {
+        
         testModel(model, data, tensorData);
     }
 
-    const createModel = () => {
-        const model = tf.sequential();
-        model.add(tf.layers.dense({inputShape: [1], units: 1, useBias: true}));
-        model.add(tf.layers.dense({units: 1, useBias: true}));
-        return model;
+    const createModel = async () => {
+        const _model = tf.sequential();
+
+        // 密集（全连接）层的构造函数
+        // inputShape: [1]: 这指定了输入数据的形状。在这个例子中，输入数据是一维的，每个样本具有一个特征。因此，输入形状是 [1]，表示单个数值作为输入特征 
+        // units 用于设置权重矩阵在层中的大小。将其设置为 1 即表示数据的每个输入特征的权重为 1
+        _model.add(tf.layers.dense({inputShape: [1], units: 1, useBias: true}));
+        _model.add(tf.layers.dense({units: 500, activation: 'sigmoid'}));
+
+        // 输出层
+        _model.add(tf.layers.dense({units: 1, useBias: true}));
+        setModel(_model);
+        tfvis.show.modelSummary({name: 'Model Summary'}, _model);
+
+        const {inputs, labels} = tensorData;
+        await trainModel(_model, inputs, labels);
+        console.log('Done Training');
     }
 
     const convertToTensor = (data: any) => {
@@ -127,13 +146,15 @@ const TrainingRegression: React.FC = (props) => {
     }
 
     useEffect(() => {
-        load();
-    }, []);
+        // load();
+    }, [])
     
     return (
     <div>
         <h1>Training Regression</h1>
-        <button onClick={run}>Run</button>
+        <button onClick={loadData}>Load data</button>
+        <button onClick={createModel}>Train Model</button>
+        <Button onClick={() => {testModel(model, data, tensorData)}}>Test Model</Button>
     </div>
     )
 }

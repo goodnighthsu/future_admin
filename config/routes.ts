@@ -70,6 +70,11 @@ export default [
                 name: 'Training Regression',
                 path: '/tensorflow/regression',
                 component: './TensorFlow/TrainingRegression/TrainingRegression',
+            },
+            {
+                name: 'CNN'
+                path: '/tensorflow/cnn',
+                component: './TensorFlow/CNN/CNN',
             }
         ]
     },
