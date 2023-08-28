@@ -63,6 +63,11 @@ export default [
         component: './MarketList/MarketList',
     },
     {
+        name: 'Trading Calendar',   // 交易日历
+        path: '/instrument/calendar',
+        component: './TradingCalendar/TradingCalendar',
+    },
+    {
         name: 'Tensor Flow',
         path: '/tensorflow',
         routes: [
@@ -72,7 +77,7 @@ export default [
                 component: './TensorFlow/TrainingRegression/TrainingRegression',
             },
             {
-                name: 'CNN'
+                name: 'CNN',
                 path: '/tensorflow/cnn',
                 component: './TensorFlow/CNN/CNN',
             }

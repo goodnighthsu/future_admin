@@ -59,6 +59,16 @@ export const cleanLocalUser = () => {
 export const tableHeight = 68 + 16;
 
 /**
+ * 所有页面的状态
+ */
+export const enum PageState {
+    /**
+     * 交易日历
+     */
+    tradingCalendar = 'TradingCalendarState',
+}
+
+/**
  * App state
  */
 export default () => {
