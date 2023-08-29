@@ -87,6 +87,10 @@
     "umi-presets-pro": "^1.0.1",
     "umi-serve": "^1.9.10"
   },
+  "resolutions": {
+    "@types/react": "17.0.0",
+    "@types/react-dom": "^17.0.0"
+  },
   "engines": {
     "node": ">=12.0.0"
   }

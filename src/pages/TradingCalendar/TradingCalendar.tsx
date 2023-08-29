@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useModel } from '@umijs/max';
 import { PageState } from '@/models/AppState';
-import { PageContainer, useDeepCompareEffect } from '@ant-design/pro-components';
+import { PageContainer } from '@ant-design/pro-components';
 import { Calendar, Select } from 'antd';
 import moment from 'moment';
 import styles from './TradingCalendar.less';
 import { requestConfig } from '@/services/requests/requestConfig';
+import { HistoryModel } from '@/models/models/HistoryModel';
 
 const monthStrings = [
     '一', '二', '三', '四', 
@@ -26,12 +27,18 @@ const TradingCalendar:React.FC = (props) => {
     const [year] = useState<number>(new Date().getFullYear());
     const [months, setMonths] = useState<string[]>(monthStrings);
     const [tradingDays, setTradingDays] = useState<string[]>([]);
+    const [histories, setHistories] = useState<HistoryModel[]>([]);
 
     // methods
     const load = async (year: number) => {
         const tradingDays = await requestConfig.tradingDays(year);
         if (tradingDays) {
             setTradingDays(tradingDays);
+        }
+
+        const histories = await requestConfig.history();
+        if (histories) {
+            setHistories(histories);
         }
     }
 
@@ -58,7 +65,26 @@ const TradingCalendar:React.FC = (props) => {
                                         return <div className={styles.page_container_monthHeader}>{month}月</div>
                                     }}
                                     dateFullCellRender={value => {
-                                        return <div>{value.format('DD')}</div>
+                                        const day = value.format('YYYYMMDD');
+                                        const now = moment().format('YYYYMMDD');
+                                        let styles = {backgroundColor: 'none'};
+                                        
+                                        if (histories.find(h => h.tradingDay ===day)) {
+                                            // 有历史数据
+                                            styles.backgroundColor = 'green';
+                                        }else {
+                                            // 没有历史数据, 是交易日
+                                            if (tradingDays.includes(day) && day <= now) {
+                                                styles.backgroundColor = 'red';
+                                            }
+                                        }
+                                        if (day === now) 
+                                        {
+                                            styles.backgroundColor = '#1677ff';
+                                        }
+
+                                    
+                                        return <div style={styles}>{value.format('DD')}</div>
                                     }}
                                     disabledDate={value => {
                                         return !tradingDays.includes(value.format('YYYYMMDD'));

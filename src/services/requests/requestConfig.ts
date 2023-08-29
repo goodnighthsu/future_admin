@@ -1,4 +1,5 @@
-import request, { CreateByResponse, IResponse } from '@/utils/request';
+import { HistoryModel } from '@/models/models/HistoryModel';
+import request, { IResponse } from '@/utils/request';
 
 export const requestConfig = {
     /**
@@ -14,6 +15,14 @@ export const requestConfig = {
             }
         });
 
+        return response?.data;
+    },
+
+    /**
+     * 返回行情历史记录状态
+     */
+    history: async () => {
+        const response: IResponse<HistoryModel[]> | undefined = await request('/ctpslave/config/history');
         return response?.data;
     }
 }
