@@ -1,8 +1,8 @@
-import tensorRequest from '@/utils/tensorRequest';
 import React, { useEffect, useState } from 'react';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tf from '@tensorflow/tfjs';
 import { Button } from 'antd';
+import tensorRequest from '../requests/tensorRequest';
 
 const TrainingRegression: React.FC = (props) => {
     const [data, setData] = useState([]);
