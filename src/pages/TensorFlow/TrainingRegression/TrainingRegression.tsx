@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tf from '@tensorflow/tfjs';
+import { Dense } from '@tensorflow/tfjs-layers/dist/layers/core';
 import { Button } from 'antd';
 import tensorRequest from '../requests/tensorRequest';
 
@@ -56,7 +57,9 @@ const TrainingRegression: React.FC = (props) => {
         // 密集（全连接）层的构造函数
         // inputShape: [1]: 这指定了输入数据的形状。在这个例子中，输入数据是一维的，每个样本具有一个特征。因此，输入形状是 [1]，表示单个数值作为输入特征 
         // units 用于设置权重矩阵在层中的大小。将其设置为 1 即表示数据的每个输入特征的权重为 1
-        _model.add(tf.layers.dense({inputShape: [1], units: 1, useBias: true}));
+        
+        const inputLayer: Dense = tf.layers.dense({name: 'input layer', inputShape: [1], units: 1, useBias: true});
+        _model.add(inputLayer);
         _model.add(tf.layers.dense({units: 500, activation: 'sigmoid'}));
 
         // 输出层
@@ -81,10 +84,14 @@ const TrainingRegression: React.FC = (props) => {
             const inputMin = inputTensor.min();
             const labelMax = labelTensor.max();
             const labelMin = labelTensor.min();
+            console.log(inputs);
+            console.log(inputMax.dataSync(), inputMin.dataSync(), labelMax, labelMin);
 
+            // 150 - 46 / 230 - 46
+            // 104 / 184
             const normailizedInputs = inputTensor.sub(inputMin).div(inputMax.sub(inputMin));
             const normailizedLabels = labelTensor.sub(labelMin).div(labelMax.sub(labelMin));
-
+            console.log(inputTensor.dataSync(), normailizedInputs.dataSync());
             return {
                 inputs: normailizedInputs,
                 labels: normailizedLabels,

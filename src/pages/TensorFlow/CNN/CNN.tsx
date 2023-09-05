@@ -32,12 +32,14 @@ const CNN: React.FC = (props) => {
     const surface = tfvis.visor().surface({ name: 'Input Data Examples', tab: 'Input Data' });
 
     // Get the examples
-    const examples = data.nextTestBatch(20);
+    const examples = data.nextTestBatch(10);
+
     const numExamples = examples.xs.shape[0];
 
     // Create a canvas element to render each example
     for (let i = 0; i < numExamples; i++) {
       const imageTensor = tf.tidy(() => {
+        console.log(examples.labels.arraySync());
         // Reshape the image to 28x28 px
         return examples.xs
           .slice([i, 0], [1, examples.xs.shape[1]])
@@ -60,6 +62,8 @@ const CNN: React.FC = (props) => {
     // In the first layer of our convolutional neural network we have
     // to specify the input shape. Then we specify some parameters for
     // the convolution operation that takes place in this layer.
+    // conv2d 二维卷积层
+    // kernelSize 卷积核大小
     model.add(tf.layers.conv2d({
       inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
       kernelSize: 5,
@@ -87,6 +91,7 @@ const CNN: React.FC = (props) => {
     // Now we flatten the output from the 2D filters into a 1D vector to prepare
     // it for input into our last layer. This is common practice when feeding
     // higher dimensional data to a final classification output layer.
+    // flatten 展平
     model.add(tf.layers.flatten());
 
     // Our last layer is a dense layer which has 10 output units, one for each
@@ -100,6 +105,7 @@ const CNN: React.FC = (props) => {
 
     // Choose an optimizer, loss function and accuracy metric,
     // then compile and return the model
+    // 指定跟踪的优化程序、损失函数和指标
     const optimizer = tf.train.adam();
     model.compile({
       optimizer: optimizer,
@@ -130,7 +136,7 @@ const CNN: React.FC = (props) => {
         d.labels
       ];
     });
-
+    
     // 验证数据
     const [testXs, testYs] = tf.tidy(() => {
       const d = data.nextTestBatch(TEST_DATA_SIZE);
@@ -140,6 +146,7 @@ const CNN: React.FC = (props) => {
       ];
     });
 
+    // 训练
     return model.fit(trainXs, trainYs, {
       batchSize: BATCH_SIZE,
       validationData: [testXs, testYs],
@@ -159,8 +166,9 @@ const CNN: React.FC = (props) => {
     const testData = data.nextTestBatch(testDataSize);
     const testxs = testData.xs.reshape([testDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1]);
     const labels = testData.labels.argMax(-1);
-    const preds = model.predict(testxs).argMax(-1);
-
+    const preds = model.predict(testxs).argMax(-1).print();
+    // console.log("preds: ", preds.arraySync());
+    // console.log("labels: ", labels.arraySync());
     testxs.dispose();
     return [preds, labels];
   }
@@ -192,9 +200,9 @@ const CNN: React.FC = (props) => {
     await train(_model, data);
   }
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // useEffect(() => {
+  //   loadData();
+  // }, []);
 
   return (
     <div>
