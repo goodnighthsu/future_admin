@@ -22,7 +22,7 @@ const QuoteList:React.FC = (props) => {
     // MARK: - --- methods ---
     // MARK: -  load 加载行情数据
     const load = async (keyword?: string, page?: number, pageSize?: number) => {
-        const response = await requestFuture.quote();
+        const response = await requestFuture.quote(() => {});
         if (!response) {
             return;
         }

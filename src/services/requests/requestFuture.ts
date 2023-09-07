@@ -278,11 +278,12 @@ export const requestFuture = {
     /**
      * 实时行情
      */
-    quote: async () => {
+    quote: async (errorHandler?: (error: any) => void) => {
         const response: IResponse<TradingModel[]> | undefined = await request(
             '/ctpslave/market/instrument/quotes',
             {
-                method: 'get'
+                method: 'get',
+                errorHandler: errorHandler,
             }
         );
 

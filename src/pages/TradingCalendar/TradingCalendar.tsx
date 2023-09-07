@@ -8,7 +8,6 @@ import moment from 'moment';
 import styles from './TradingCalendar.less';
 import { requestConfig } from '@/services/requests/requestConfig';
 import { HistoryModel } from '@/models/models/HistoryModel';
-import { eventNames } from 'process';
 
 const monthStrings = [
     '一', '二', '三', '四', 
