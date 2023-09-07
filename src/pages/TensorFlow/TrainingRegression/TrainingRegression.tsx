@@ -57,7 +57,6 @@ const TrainingRegression: React.FC = (props) => {
         // inputShape: [1]: 这指定了输入数据的形状。在这个例子中，输入数据是一维的，每个样本具有一个特征。因此，输入形状是 [1]，表示单个数值作为输入特征 
         // units 用于设置权重矩阵在层中的大小。将其设置为 1 即表示数据的每个输入特征的权重为 1
         _model.add(tf.layers.dense({inputShape: [1], units: 1, useBias: true}));
-        _model.add(tf.layers.dense({units: 500, activation: 'sigmoid'}));
 
         // 输出层
         _model.add(tf.layers.dense({units: 1, useBias: true}));

@@ -19,6 +19,21 @@ export const requestConfig = {
     },
 
     /**
+     * 交易日编辑
+     * @returns 
+     */
+    tradingDaysUpdate: async (year: number, holiday: string) => {
+        const response = await request('/ctpslave/market/tradingDays', {
+            method: 'post',
+            params: {
+                year: year,
+                holidays: holiday
+            }
+        });
+        return response?.data;
+    },
+
+    /**
      * 返回行情历史记录状态
      */
     history: async () => {
