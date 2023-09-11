@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useModel } from '@umijs/max';
 import { PageState } from '@/models/AppState';
 import { PageContainer } from '@ant-design/pro-components';
-import { Calendar, Select } from 'antd';
+import { Button, Calendar, Select, Switch } from 'antd';
 import moment from 'moment';
 import styles from './TradingCalendar.less';
 import { requestConfig } from '@/services/requests/requestConfig';
@@ -28,6 +28,11 @@ const TradingCalendar:React.FC = (props) => {
     const [months, setMonths] = useState<string[]>(monthStrings);
     const [tradingDays, setTradingDays] = useState<string[]>([]);
     const [histories, setHistories] = useState<HistoryModel[]>([]);
+    const [holidays, setHolidays] = useState<string[]>([]);
+    /**
+     * 编辑模式
+     */
+    const [isEdit, setIsEdit] = useState<boolean>(false);
 
     // methods
     const load = async (year: number) => {
@@ -42,6 +47,66 @@ const TradingCalendar:React.FC = (props) => {
         }
     }
 
+    /**
+     * 修改交易日
+     */
+    const changeHoliday = (value: moment.Moment, month: moment.Moment, holidays: string[]) => {
+        const day = value.format('YYYYMMDD');
+        let _holidays = holidays;
+        if (holidays.includes(day)) {
+            _holidays = holidays.filter(v => v !== day);
+        }else{
+            _holidays.push(day);
+        }
+        setHolidays(_holidays);
+    }
+
+    /**
+     * 点击提交，保存交易日
+     * @param year 
+     * @param holiday 
+     * @returns 
+     */
+    const clickSubmit = async( year: number, holidays: string[]) => {
+        const response = await requestConfig.tradingDaysUpdate(year, holidays.join(','));
+        if (!response) {
+            return;
+        }
+        load(year);
+        setIsEdit(false);
+    }
+
+    const dateFullCellRender = (value: moment.Moment, isEdit: boolean, holidays: string[]) => {
+        let styles = {backgroundColor: 'white'};
+        const day = value.format('YYYYMMDD');
+        if (isEdit) {
+            // 编辑模式
+            if (holidays.includes(day)){
+                styles.backgroundColor = 'red';
+            }
+            return <div style={styles}>{value.format('DD')}</div>
+        }
+
+        // 非编辑
+
+        const now = moment().format('YYYYMMDD');
+        if (histories.find(h => h.tradingDay ===day)) {
+            // 有历史数据
+            styles.backgroundColor = 'green';
+        }else {
+            // 没有历史数据, 是交易日
+            if (tradingDays.includes(day) && day <= now) {
+                styles.backgroundColor = 'red';
+            }
+        }
+        if (day === now) 
+        {
+            styles.backgroundColor = '#1677ff';
+        } 
+        return <div style={styles}>{value.format('DD')}</div>
+    }
+
+    // effect
     useEffect(() => {
         load(year);
     }, []);
@@ -53,6 +118,16 @@ const TradingCalendar:React.FC = (props) => {
                     <Select className={styles.toolbar_select}
                         value={selectedYear} 
                         onChange={updateSelectedYear} />
+                    <div>
+                        {
+                            isEdit &&
+                            <Button onClick={() => {clickSubmit(year, holidays)}}>保存</Button>
+                        }
+                        编辑
+                        <Switch value={isEdit} onChange={ value => setIsEdit(value)}/>
+
+                    </div>
+                    
                 </div>
                 <div className={styles.page_container}>
                 {
@@ -65,29 +140,16 @@ const TradingCalendar:React.FC = (props) => {
                                         return <div className={styles.page_container_monthHeader}>{month}月</div>
                                     }}
                                     dateFullCellRender={value => {
-                                        const day = value.format('YYYYMMDD');
-                                        const now = moment().format('YYYYMMDD');
-                                        let styles = {backgroundColor: 'none'};
-                                        
-                                        if (histories.find(h => h.tradingDay ===day)) {
-                                            // 有历史数据
-                                            styles.backgroundColor = 'green';
-                                        }else {
-                                            // 没有历史数据, 是交易日
-                                            if (tradingDays.includes(day) && day <= now) {
-                                                styles.backgroundColor = 'red';
-                                            }
-                                        }
-                                        if (day === now) 
-                                        {
-                                            styles.backgroundColor = '#1677ff';
-                                        }
-
-                                    
-                                        return <div style={styles}>{value.format('DD')}</div>
+                                        return dateFullCellRender(value, isEdit, holidays);
                                     }}
                                     disabledDate={value => {
+                                        if (isEdit) {
+                                            return false;
+                                        }
                                         return !tradingDays.includes(value.format('YYYYMMDD'));
+                                    }}
+                                    onSelect={(value) => {
+                                        changeHoliday(value, _month, holidays);
                                     }}
                                 />
                             </div>
