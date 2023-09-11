@@ -1,0 +1,54 @@
+
+@import '@/app.less';
+
+.page {
+    display: inline-block;
+    height: @toolBarCellHeight;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: @toolBarCellHeight;
+    overflow: hidden;
+    
+    margin: 0 0 8px 0;
+}
+
+.tip {
+    font-size: 14px;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.filterButton {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100px;
+    height: @toolBarCellHeight;
+
+    border-radius: 3px;
+    color: #333333;
+    background-color: #EDF1F8;
+    
+    padding: 0 8px;
+
+    cursor: pointer;
+}
+
+.filterButton:hover {
+    background-color: #314560;
+    color: white;
+}
+
+.filterButton_title {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    .ellipsis;
+}

@@ -1,0 +1,48 @@
+@import '@/app.less';
+
+.toolBar {
+    display: inline-block;
+    
+    background-color: white;
+    padding: 8px;
+    width: 100%;
+}
+
+.toolBar_item {
+    display: inline-block;
+}
+
+.toolBar_search {
+    margin-right: 20px;
+    width: 180px;
+    float: right;
+}
+
+.moreButton {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    height: @toolBarCellHeight;
+
+    border-radius: 3px;
+    color: #333333;
+    background-color: #EDF1F8;
+    
+    margin-left: 12px;
+    padding: 0 8px;
+
+    cursor: pointer;
+}
+
+.moreButton:hover {
+    background-color: #314560;
+    color: white;
+}
+
+.moreButton_title {
+    margin-right: 8px;
+    text-align: center;
+    font-size: 12px;
+}

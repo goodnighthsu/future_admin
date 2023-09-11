@@ -10,6 +10,8 @@ import { tableHeight } from '@/models/AppState';
 import { debounce } from 'lodash';
 import { SearchOutlined } from '@ant-design/icons';
 import { ColumnType } from 'antd/lib/table';
+import ToolBar from '@/components/ToolBar/ToolBar';
+import { IColumnOptional } from '@/components/ToolBar/IToolBarFilter';
 
 /**
  * 合约
@@ -64,7 +66,7 @@ const InstrumentList:React.FC = (props) => {
         load(keyword, page, pageSize);
     }
 
-    const columns: ColumnType<InstrumentModel>[] = [
+    const columns: IColumnOptional<InstrumentModel>[] = [
         { title: 'ID', dataIndex: 'id', width: 40},
         { title: '合约名称', dataIndex: 'instrumentName', width: 160},
         { title: '合约代码', dataIndex: 'instrumentID', width: 160},
@@ -112,6 +114,7 @@ const InstrumentList:React.FC = (props) => {
     return (
         <PageContainer>
             <div className={styles.page}>
+                <ToolBar columns={columns}/>
                 <div className={styles.toolbar}>
                     <div className={styles.toolbar_left}>
                         <Input style={{flex: '0 0 200px'}} allowClear value={keyword} prefix={<SearchOutlined />}
