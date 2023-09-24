@@ -80,6 +80,11 @@ export default [
                 name: 'CNN',
                 path: '/tensorflow/cnn',
                 component: './TensorFlow/CNN/CNN',
+            },
+            {
+              name: 'Tic Tac Toe',
+              path: '/tensorflow/ticTacToe',
+              component: './TensorFlow/TicTacToe/TicTacToe',
             }
         ]
     },

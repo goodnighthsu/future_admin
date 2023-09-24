@@ -39,7 +39,6 @@ const CNN: React.FC = (props) => {
     // Create a canvas element to render each example
     for (let i = 0; i < numExamples; i++) {
       const imageTensor = tf.tidy(() => {
-        console.log(examples.labels.arraySync());
         // Reshape the image to 28x28 px
         return examples.xs
           .slice([i, 0], [1, examples.xs.shape[1]])
@@ -125,8 +124,8 @@ const CNN: React.FC = (props) => {
     const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
 
     const BATCH_SIZE = 512;
-    const TRAIN_DATA_SIZE = 5500;
-    const TEST_DATA_SIZE = 1000;
+    const TRAIN_DATA_SIZE = 55000;
+    const TEST_DATA_SIZE = 10000;
 
     // 训练数据
     const [trainXs, trainYs] = tf.tidy(() => {
@@ -166,8 +165,11 @@ const CNN: React.FC = (props) => {
     const testData = data.nextTestBatch(testDataSize);
     const testxs = testData.xs.reshape([testDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1]);
     const labels = testData.labels.argMax(-1);
-    const preds = model.predict(testxs).argMax(-1).print();
-    // console.log("preds: ", preds.arraySync());
+    const all = model.predict(testxs);
+    const preds = all.argMax(-1);
+    // console.log("preds: ", preds.dataSync());
+    all.print();
+    labels.print();
     // console.log("labels: ", labels.arraySync());
     testxs.dispose();
     return [preds, labels];
