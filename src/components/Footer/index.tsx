@@ -20,6 +20,7 @@ const Footer: React.FC = () => {
       copyright={`${currentYear} ${defaultMessage}`}
       links={[
         {
+          key: 'www.xleon.site',
           title: 'www.xleon.site',
           href: 'https://www.xleon.site',
           blankTarget: true,
@@ -31,6 +32,7 @@ const Footer: React.FC = () => {
           blankTarget: true,
         },
         {
+          key: '沪ICP备20025051号-1', 
           title: '沪ICP备20025051号-1',
           href: 'https://beian.miit.gov.cn/',
           blankTarget: true,

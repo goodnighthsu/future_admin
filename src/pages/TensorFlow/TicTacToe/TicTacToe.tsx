@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Input } from 'antd';
+import { Avatar, Button, Input } from 'antd';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tf from '@tensorflow/tfjs';
 import { Dense } from '@tensorflow/tfjs-layers/dist/layers/core';
@@ -132,7 +132,7 @@ class PlayerModel {
         // this.randomMoveDecrease = 0.95;
     }
 
-    getQValue = (board: string[]) => {
+    getQValues = (board: number[]) => {
         let result: number[] = this.qValue[board.join('-')];
         if (result === undefined) {
             result = new Array(9).fill(0);
@@ -207,7 +207,7 @@ class PlayerModel {
     }
 
     qStrategy = (chessBoard: string[]) => {
-        const qValue = [...this.getQValue(chessBoard)];
+        const qValue = [...this.getQValues(chessBoard)];
         const _qValue = qValue.map((item, index) => {
             if (chessBoard[index] != '') {
                 return -1;
@@ -247,7 +247,7 @@ class PlayerModel {
             .forEach((item, index) => {
                 const key = item.join("-");
                 const action = this.actionLogs[index];
-                const qValues = this.getQValue(item);
+                const qValues = this.getQValues(item);
                 // 最后一步
                 if (index === 0) {
                     qValues[action] = reward;
@@ -285,18 +285,29 @@ class PlayerModel {
         const inputs = this.chessBoardToTensor(chessBoard);
         return tf.tidy(() => {
             // const pred = this.neuralNetwork.predict(tf.tensor([inputs]).reshape([1, 3, 3,1])) as tf.Tensor<tf.Rank>;
+
+            //
             const pred = this.neuralNetwork.predict(tf.tensor([inputs])) as tf.Tensor<tf.Rank>;
-            const target = pred.dataSync() as Float32Array;
+            let target = pred.dataSync() as Float32Array;
+
+            let randomRate = Math.random();
+            // 短期记忆
+            const key = inputs.join('-');
+            if (this.qValue[key]) {
+                console.log('短期记忆命中: ', this.qValue[key]);
+                target = new Float32Array(this.qValue[key]);
+                randomRate = 100;
+            }
+
             const datas = target.map((item, index) => {
                 if (chessBoard[index] !== '') {
                     item = -1;
                 }
 
                 return item;
-            });
+            });   
 
             let action:number;
-            let randomRate = Math.random();
             if (randomRate < this.randomMove && isTrain) {
                 action = this.random(chessBoard);
             }else {
@@ -345,6 +356,17 @@ class PlayerModel {
                 const action = this.actionLogs[index];
                 const _item = [...item]; 
                 _item[action] = _item[action] * (1 - rate) + rate * gammer * lastValue;
+                if (index === 0) {
+                    // 保存最后一步到qValue作为短期记忆
+                    // 局面key
+                    const board = inputs[index];
+                    const key = board.join('-');
+                    const qValues = this.getQValues(board);
+                    qValues[action] = reward;
+                    this.qValue[key] = qValues;
+                    _item[action] = reward;
+                    // console.log('短期记忆保存: ', key, this.qValue[key]);
+                }
                 lastValue = _item[action];
                 return _item;
             });
@@ -592,7 +614,7 @@ const TikTacToe: React.FC = (props) => {
         let win = 0;
         let draw = 0;
         while (i < trainCount) {
-            while (i < 1000 * batch) {
+            while (i < 1000 * batch && i < trainCount) {
                 player = await randomVsNeural(false, isTrain);
                 if (player.board.result === playerO.name) {
                     win++;

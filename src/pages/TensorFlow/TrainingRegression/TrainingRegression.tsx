@@ -48,7 +48,6 @@ const TrainingRegression: React.FC = (props) => {
   }
 
   const run = async () => {
-
     testModel(model, data, tensorData);
   }
 

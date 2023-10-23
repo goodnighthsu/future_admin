@@ -28,6 +28,12 @@ export class App {
         return this._app;
     }
 
+    /**
+     * 初始本地用户
+     * 从localStorage中获取保存的用户token, 没有token返回undefined
+     * 有token 请求并返回用户详情，并保存到App.instance().currentUser
+     * @returns SysUserModel 用户详情 
+     */
     public static initLocalUser = async (): Promise<SysUserModel | undefined> => {
         const jsonString = localStorage.getItem(CURRENT_USER);
         if (!jsonString) {
@@ -48,7 +54,6 @@ export class App {
             return undefined;
         }
     }
-
 }
 
 export const cleanLocalUser = () => {
@@ -80,7 +85,7 @@ export default () => {
     /**
      * login
      */
-    const login = useCallback(async (account, password): Promise<SysUserModel | undefined> => {
+    const login = useCallback(async (account :string, password: string): Promise<SysUserModel | undefined> => {
         setIsLoading(true);    
         const user: SysUserModel | undefined = await requestSysUser.login(account, password);
         // save global token
@@ -89,10 +94,12 @@ export default () => {
         }
         saveUser(user);
         const detail = await App.initLocalUser();
-        setInitialState((preInitialState) => ({
+        setInitialState((preInitialState) => {
+            return {
             ...preInitialState,
             currentUser: detail,
-          }));
+          }
+        });
         setIsLoading(false);
         
         return detail;
