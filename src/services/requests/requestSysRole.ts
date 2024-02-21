@@ -1,8 +1,19 @@
 import { SysUserModel } from "@/models/SysUserListState";
-import { SysPermissionModel, SysRoleModel } from "@/models/SysRoleListState";
+import { SysRoleModel } from "@/models/SysRoleListState";
 import request, { IPagingResponse, IPagingResult, IResponse } from "@/utils/request";
+import { SysPermissionModel } from "@/models/models/SysPermissionModel";
 
+/**
+ * 角色接口
+ */
 export const requestSysRole = {
+    /**
+     * 角色列表
+     * 
+     * @param page 
+     * @param pageSize 
+     * @returns 
+     */
     list: async (page?: number, pageSize?: number): Promise<IPagingResult<SysRoleModel> | undefined> => {
         const response: IPagingResponse<SysRoleModel> | undefined  = await request('/platform/api/sysRole', {
             method: 'get',
@@ -18,6 +29,12 @@ export const requestSysRole = {
         }
     },
 
+    /**
+     * 添加角色
+     * 
+     * @param sysRole 
+     * @returns 
+     */
     add: async (sysRole: SysRoleModel): Promise<SysRoleModel | undefined> => {
         const response: IResponse<SysRoleModel> | undefined = await request('/platform/api/sysRole', {
             method: 'post',
@@ -31,6 +48,11 @@ export const requestSysRole = {
         return response?.data;
     }, 
 
+    /**
+     * 修改角色
+     * @param sysRole 
+     * @returns 
+     */
     put: async (sysRole: SysRoleModel): Promise<SysRoleModel | undefined> => {
         const response: IResponse<SysRoleModel> | undefined = await request('/platform/api/sysRole', {
             method: 'put',
@@ -40,6 +62,11 @@ export const requestSysRole = {
         return response?.data;
     }, 
 
+    /**
+     * 删除角色
+     * @param datas 
+     * @returns 
+     */
     delete: async(datas: SysRoleModel[]): Promise<SysRoleModel | undefined> => {
         const ids: number[] | undefined = datas.map(item => item.id!);
         if (!ids || ids.length === 0) {
@@ -54,12 +81,13 @@ export const requestSysRole = {
     },
 
     /**
-     * 角色权限
-     * @param sysRole 
-     * @returns 
+     * 角色配置的权限
+     * 
+     * @param sysRole 色
+     * @returns 角色配置的权限
      */
     listPermissions: async (sysRole: SysRoleModel): Promise<SysPermissionModel[] | undefined> => {
-        const response: IResponse<SysPermissionModel[]> | undefined = await request(`/platform/api/sysRole/${sysRole?.id}/permission`, {
+        const response: IResponse<SysPermissionModel[]> | undefined = await request(`/platform/api/sysRole/${sysRole.id}/permission`, {
             method: 'get'
         });
 
@@ -67,18 +95,40 @@ export const requestSysRole = {
     },
 
     /**
-     * 角色权限更新
-     * @param permissions 
+     * 更新角色权限
+     * @param sysRole 角色
+     * @param permissions 角色配置的权限
      * @returns 
      */
-    updatePermissions: async (sysRole: SysRoleModel, permissions: string[]): Promise<string[] | undefined> => {
+    updatePermissions: async (sysRole: SysRoleModel, permissions: SysPermissionModel[]): Promise<string[] | undefined> => {
+        const enables = requestSysRole.getEnablePermissionByCheck(permissions) ?? [];
+        console.log('enables p: ', permissions);
+        console.log('enables: ', enables);
+        const permissionStrings = enables.map(item => item.title);
         const response: IResponse<string[]> | undefined = await request(`/platform/api/sysRole/${sysRole?.id}/permission`, {
             method: 'put',
-            data: {
-                permissions: permissions,
-            }
+            data: permissionStrings
         });
 
         return response?.data;
+    },
+
+    /**
+     * 获取权限中勾选或半勾选的权限
+     * 
+     * @param permissions 权限组
+     * @returns 有效勾选的权限
+     */
+    getEnablePermissionByCheck: (permissions: SysPermissionModel[]) => {
+        let result: SysPermissionModel[] = [];
+        permissions.forEach(item => {
+            if (item.checked !== 'none' && !item.isList) {
+                result.push(item);
+            }
+            const subPermissions = requestSysRole.getEnablePermissionByCheck(item.children ?? []);
+            result = [...result, ...subPermissions];
+        });
+
+        return result;
     }
 }

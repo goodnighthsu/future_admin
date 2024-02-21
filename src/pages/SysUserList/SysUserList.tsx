@@ -7,17 +7,18 @@ import { StateEnum } from '@/models/BaseModel';
 import { SysUserModel } from '@/models/SysUserListState';
 import SysRoleSelect from '../SysRoleList/components/SysRoleSelect';
 import Tooltip from 'antd/es/tooltip';
-import { DeleteOutlined, EditTwoTone, RedoOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
 import Popconfirm from 'antd/es/popconfirm';
 import SysUserAdd from './SysUserAdd';
 import { SysRoleModel } from '@/models/SysRoleListState';
 import { requestSysUser } from '@/services/requests/requestSysUser';
 import { requestSysRole } from '@/services/requests/requestSysRole';
 import SysUserReset from './SysUserReset';
+import { SysPermissionEnum, auth } from '@/models/models/SysPermissionModel';
 
 /**
- * 
- * @param props 账号列表
+ * 账号列表
+ * @param props 
  * @returns 
  */
 const SysUserList: React.FC = (props) => {
@@ -111,15 +112,20 @@ const SysUserList: React.FC = (props) => {
                 return (
                     <div className={styles.cell_action}>
                         <Tooltip title='编辑'>
-                            <Button type='link' icon={<EditTwoTone/> } onClick={() => {setSelected(item); setOpenAdd(true);}}/>
+                            <Button type='link' icon={<EditOutlined/> }
+                                disabled={!auth(SysPermissionEnum.accountManageAccountUpdate)} 
+                                onClick={() => {setSelected(item); setOpenAdd(true);}}/>
                         </Tooltip>
                         <Tooltip title='密码重置'>
-                            <Button type='link' icon={<RedoOutlined/> } onClick={() => {setSelected(item); setOpenReset(true);}}/>
+                            <Button type='link' icon={<RedoOutlined/> } 
+                                disabled={!auth(SysPermissionEnum.accountManageAccountUpdate)} 
+                                onClick={() => {setSelected(item); setOpenReset(true);}}/>
                         </Tooltip>
                         <Popconfirm title='确认删除?' placement="topRight" disabled={item.id===1}
                             onConfirm={() => {clickDelete(item)}}>
                             <Tooltip title='删除'>
-                                <Button type='link' icon={<DeleteOutlined/> } disabled={item.id===1}/>
+                                <Button type='link' icon={<DeleteOutlined/> } 
+                                    disabled={item.id===1 ||!auth(SysPermissionEnum.accountManageAccountDelete)}/>
                             </Tooltip>
                         </Popconfirm>
                     </div>
@@ -144,7 +150,11 @@ const SysUserList: React.FC = (props) => {
     return (
         <PageContainer>
             <div className={styles.toolbar}>
-                <Button type='primary' onClick={() => {setSelected(undefined); setOpenAdd(true);} }>创建</Button>
+                <Button type='primary' onClick={() => {setSelected(undefined); setOpenAdd(true);} }
+                    disabled={!auth(SysPermissionEnum.accountManageAccountAdd)}
+                >
+                    创建
+                </Button>
                 <Pagination current={page} pageSize={pageSize} total={total} onChange={changePage}/>
             </div>
             <div className={styles.tableWrapper}>

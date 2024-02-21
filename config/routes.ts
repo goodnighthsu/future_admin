@@ -45,31 +45,37 @@ export default [
     {
         name: 'welcome',
         path: '/welcome',
+        access: 'routeFilter',
         component: './Welcome/Welcome'
     },
     {
         name: 'Quote List',
         path: '/instrument/quote',
+        access: 'routeFilter',
         component: './QuoteList/QuoteList',
     },
     {
         name: '合约',
-        path: '/instrument/trade',
+        path: '/instrument/instrument',
+        access: 'routeFilter',
         component: './InstrumentList/InstrumentList',
     },
     {
         name: 'Market',
         path: '/instrument/market',
+        access: 'routeFilter',
         component: './MarketList/MarketList',
     },
     {
         name: 'Trading Calendar',   // 交易日历
         path: '/instrument/calendar',
+        access: 'routeFilter',
         component: './TradingCalendar/TradingCalendar',
     },
     {
         name: 'Tensor Flow',
         path: '/tensorflow',
+        access: 'routeFilter',
         routes: [
             {
                 name: 'Training Regression',

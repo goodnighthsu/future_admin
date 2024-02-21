@@ -1,7 +1,7 @@
 const server = () => {
     if (process.env.NODE_ENV === 'development') {
         // return 'http://124.221.2.131:8200'
-        return 'http://192.168.1.201:8200';
+        return 'http://124.221.2.131:8200'
     } else {
         // return new URL(window.location.href);
         return 'http://124.221.2.131:8200'

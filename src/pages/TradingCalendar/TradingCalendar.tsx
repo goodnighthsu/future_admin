@@ -8,6 +8,7 @@ import moment from 'moment';
 import styles from './TradingCalendar.less';
 import { requestConfig } from '@/services/requests/requestConfig';
 import { HistoryModel } from '@/models/models/HistoryModel';
+import { SysPermissionEnum, auth } from '@/models/models/SysPermissionModel';
 
 const monthStrings = [
     '一', '二', '三', '四', 
@@ -123,11 +124,11 @@ const TradingCalendar:React.FC = (props) => {
                             isEdit &&
                             <Button onClick={() => {clickSubmit(year, holidays)}}>保存</Button>
                         }
-                        编辑
-                        <Switch value={isEdit} onChange={ value => setIsEdit(value)}/>
-
+                        编辑:
+                        <Switch value={isEdit} onChange={ value => setIsEdit(value)}
+                            disabled={!auth(SysPermissionEnum.tradingCalendarUpdate)}
+                        />
                     </div>
-                    
                 </div>
                 <div className={styles.page_container}>
                 {
