@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
 import { BaseModel, StateEnum } from "./BaseModel";
-import { SysPermissionModel, SysRoleModel } from './SysRoleListState';
-import Setting from '../../config/Setting';
-import { requestSysUser } from '@/services/requests/requestSysUser';
+import { SysRoleModel } from './SysRoleListState';
+import ToolBarState from './models/ToolBarState';
+import PaginationState from './models/PaginationState';
+import { SysPermissionModel } from "./models/SysPermissionModel";
 
 /**
  * 系统用户
@@ -25,38 +25,10 @@ export interface SysUserModel extends BaseModel {
 /**
  * SysUserList 账号列表页state
  */
+// let init = true;
 export default () => {
-    const [page, setPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(Setting.defaultPageSize);
-    const [datas, setDatas] = useState<SysUserModel[]>([]);
-    const [total, setTotal] = useState<number>(0);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    const updatePaging = useCallback((page: number, pageSize: number) => {
-        setPage(page);
-        setPageSize(pageSize);
-    }, [])
-
-    const load = useCallback( async (page?: number, pageSize?: number) => {
-        setIsLoading(true);
-        const data = await requestSysUser.list(page, pageSize);
-        setIsLoading(false);
-        if (!data) {
-            return;
-        }
-        const {datas, total} = data;
-
-        setDatas(datas);
-        setTotal(total);
-    }, []);
-
     return {
-        page, 
-        pageSize,
-        updatePaging,
-        datas,
-        total,
-        isLoading,
-        load,
-    }
+        ...ToolBarState('id', 'descend'),
+        ...PaginationState(),
+    };
 };

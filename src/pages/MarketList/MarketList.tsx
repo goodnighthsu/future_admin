@@ -1,5 +1,4 @@
-import { InstrumentModel } from '@/models/InstrumentListState';
-import { IChartData } from '@/models/models/InstrumentModel';
+import { IChartData, InstrumentModel } from '@/models/models/InstrumentModel';
 import { requestFuture } from '@/services/requests/requestFuture';
 import { PageContainer } from '@ant-design/pro-components';
 import { DatePicker, Radio, Select } from 'antd';
@@ -8,6 +7,10 @@ import moment, { Moment } from 'moment';
 import React, { useEffect, useState, useRef } from 'react';
 import { createChart, createChartTooltip, createKLine } from './EChart';
 import styles from './MarketList.less';
+import ToolBar from '@/components/ToolBar/ToolBar';
+import { IColumnOptional } from '@/components/ToolBar/ToolBarFilter';
+import { FilterTypeEnum, IFilterItem } from '@/components/ToolBar/FilterForm';
+import { PageStateEnum } from '@/models/AppState';
 
 const MarketList: React.FC = (props) => {
     // MARK: - ----------------- state-----------------
@@ -25,6 +28,11 @@ const MarketList: React.FC = (props) => {
     const loadingChartRef = useRef<boolean>(false);
     const abortRef = useRef<AbortController | undefined>(undefined);
 
+    const columns: IColumnOptional<IFilterItem>[] = [
+        { title: '交易日', dataIndex: 'tradingDay', key: 'tradingDay' },
+        { title: '合约', dataIndex: 'instrumentID', key: 'instrumentID', filterType: FilterTypeEnum.text },
+    ]
+
     // MARK: - --- methods ---
     /**
      * 获取chart
@@ -38,7 +46,7 @@ const MarketList: React.FC = (props) => {
     };
 
     // MARK: - k线图
-    const loadPeriod = async(instrument: string, interval: number, tradingDay: moment.Moment) => {
+    const loadPeriod = async (instrument: string, interval: number, tradingDay: moment.Moment) => {
         const _tradingDay = tradingDay.format('YYYYMMDD');
         const response = await requestFuture.period(instrument, interval, _tradingDay);
         if (!response) {
@@ -51,14 +59,14 @@ const MarketList: React.FC = (props) => {
             tickVolumes: [],
             openInterests: [],
         };
-        response?.forEach(item  => {
+        response?.forEach(item => {
             kLine.times.push(item.tradingActionTime);
             (kLine.values ?? []).push([item.openPrice, item.closePrice, item.lowestPrice, item.highestPrice, item.tickVolume, item.openInterest]);
             kLine.tickVolumes.push(item.tickVolume);
             kLine.openInterests.push(item.openInterest);
         });
 
-        return kLine;        
+        return kLine;
     }
 
     // MARK: - 加载合约行情数据 method
@@ -142,16 +150,16 @@ const MarketList: React.FC = (props) => {
     useEffect(() => {
         chartDataRef.current = undefined;
         if (!info || !tradingDay) {
-            return () =>  {
+            return () => {
                 if (timerRef.current) {
                     clearInterval(timerRef.current);
                 }
             }
         }
-    
+
         if (periodSelected === 'TK') {
             tkView(info, tradingDay);
-            return () =>  {
+            return () => {
                 if (timerRef.current) {
                     clearInterval(timerRef.current);
                 }
@@ -200,7 +208,7 @@ const MarketList: React.FC = (props) => {
             chart.hideLoading();
         })();
 
-        return () =>  {
+        return () => {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
@@ -227,7 +235,7 @@ const MarketList: React.FC = (props) => {
             chartDataRef.current = chartData;
             const toolTip = createChartTooltip(instrument.instrumentID, 500, chartData);
             chart.setOption({
-                xAxis: {data:  chartData?.times},
+                xAxis: { data: chartData?.times },
                 tooltip: toolTip,
                 series: [
                     {
@@ -245,7 +253,7 @@ const MarketList: React.FC = (props) => {
                 ],
             });
         }, 500);
-        
+
         // chart.hideLoading();
     };
 
@@ -253,6 +261,7 @@ const MarketList: React.FC = (props) => {
     return (
         <PageContainer>
             <div className={styles.page}>
+                <ToolBar columns={columns} pageState={PageStateEnum.market} />
                 <div className={styles.toolbar}>
                     <div className={styles.toolbar_left}></div>
                     <div className={styles.toolbar_right}>
@@ -275,7 +284,7 @@ const MarketList: React.FC = (props) => {
                     <span>到期日期：</span>{info?.expireDate}
                 </div>
                 <div className={styles.period}>
-                    <Radio.Group value= {periodSelected} onChange={(e) => setPeriodSelected(e.target.value)}>
+                    <Radio.Group value={periodSelected} onChange={(e) => setPeriodSelected(e.target.value)}>
                         {
                             ['TK', '5s', '30s', '1m', '5m', '15m', '1h'].map((item) => {
                                 return <Radio.Button value={item}>{item}</Radio.Button>

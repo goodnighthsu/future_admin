@@ -3,7 +3,7 @@ import { PageContainer } from "@ant-design/pro-components";
 import { Table } from "antd";
 import styles from './QuoteList.less';
 import { requestFuture } from '@/services/requests/requestFuture';
-import { tableHeight } from '@/models/AppState';
+import { nutHeight } from '@/models/AppState';
 import { ColumnType } from 'antd/lib/table';
 import { TradingModel } from '@/models/models/TradingModel';
 
@@ -16,8 +16,7 @@ const QuoteList:React.FC = (props) => {
     // MARK: - ----------------- state-----------------
     // state
     const [datas, setDatas] = useState<TradingModel[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [contentHeight, setContentHeight] = useState<number>(tableHeight);
+    const [contentHeight, setContentHeight] = useState<number>(nutHeight);
 
     // MARK: - --- methods ---
     // MARK: -  load 加载行情数据
@@ -123,8 +122,8 @@ const QuoteList:React.FC = (props) => {
             >
                 <div className={styles.tableWrapper}>
                     <Table className={styles.table} size="small" dataSource={datas} columns={columns} bordered rowKey={'instrumentId'} pagination={false}
-                        scroll={{y: contentHeight ? contentHeight - tableHeight : tableHeight,  x: datas.length === 0 ? undefined : 'max-content'}}
-                        loading={{delay: 300, spinning: loading}}/>
+                        scroll={{y: contentHeight ? contentHeight - nutHeight : nutHeight,  x: datas.length === 0 ? undefined : 'max-content'}}
+                    />
                 </div>
             </div>  
         </PageContainer>

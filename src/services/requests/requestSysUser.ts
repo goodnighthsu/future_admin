@@ -1,5 +1,5 @@
 import { SysUserModel } from "@/models/SysUserListState";
-import request, { IPagingResponse, IPagingResult, IResponse } from "@/utils/request";
+import request, { IResponse } from "@/utils/request";
 
 export const requestSysUser = {
     login: async(account: string, password: string): Promise<SysUserModel | undefined> => {
@@ -17,21 +17,6 @@ export const requestSysUser = {
     current: async(): Promise<SysUserModel | undefined> => {
         const response: IResponse<SysUserModel> | undefined  = await request('/platform/api/sysUser/current');
         return response?.data;
-    },
-
-    list: async (page?:number, pageSize?: number): Promise<IPagingResult<SysUserModel> | undefined> => {
-        const response: IPagingResponse<SysUserModel> = await request("/platform/api/sysUser", {
-            method: 'get',
-            params: {
-                page: page,
-                pageSize: pageSize
-            }
-        });
-
-        return {
-            total: response?.data?.total ?? 0,
-            datas: response?.data?.records ?? [],
-        }
     },
 
     add: async (user: SysUserModel): Promise<SysUserModel | undefined> => {

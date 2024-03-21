@@ -4,6 +4,8 @@
 .page {
     display: inline-block;
     height: @toolBarCellHeight;
+    margin-bottom: 4px;
+    margin-top: 4px;
 }
 
 .container {
@@ -13,8 +15,7 @@
     align-items: center;
     height: @toolBarCellHeight;
     overflow: hidden;
-    
-    margin: 0 0 8px 0;
+    padding: 0;
 }
 
 .tip {
@@ -41,6 +42,24 @@
     cursor: pointer;
 }
 
+.filterButtonFix {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    height: @toolBarCellHeight;
+
+    border-radius: 3px;
+    color: #333333;
+    background-color: #EDF1F8;
+    
+    width: 100%;
+    padding: 0 8px;
+
+    cursor: pointer;
+}
+
 .filterButton:hover {
     background-color: #314560;
     color: white;
@@ -50,5 +69,12 @@
     flex: 1;
     text-align: center;
     font-size: 12px;
+    line-height: 12px;
     .ellipsis;
+}
+
+.filterButtonFix_title {
+    font-size: 12px;
+    line-height: 12px;
+    margin-right: 10px
 }

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useModel } from '@umijs/max';
-import { PageState } from '@/models/AppState';
+import { PageStateEnum } from '@/models/AppState';
 import { PageContainer } from '@ant-design/pro-components';
 import { Button, Calendar, Select, Switch } from 'antd';
 import moment from 'moment';
@@ -23,7 +23,7 @@ const monthStrings = [
  */
 const TradingCalendar:React.FC = (props) => {
 
-    const {selectedYear, updateSelectedYear} = useModel(PageState.tradingCalendar);
+    const {selectedYear, updateSelectedYear} = useModel(PageStateEnum.tradingCalendar);
 
     const [year] = useState<number>(new Date().getFullYear());
     const [months, setMonths] = useState<string[]>(monthStrings);

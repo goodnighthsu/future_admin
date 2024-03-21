@@ -3,12 +3,14 @@ import { history } from '@umijs/max';
 import { message, notification } from 'antd';
 import { extend } from 'umi-request';
 import Setting from '../../config/Setting';
+import { Key, SortOrder } from 'antd/lib/table/interface';
+import { FilterTypeEnum, IFilterItem, IOption } from '@/components/ToolBar/FilterForm';
 
 /**
  * 请求返回的响应
  */
 export interface IResponse<T> {
-    code: ResposneCode; //
+    code: ResponseCode; //
     message: string;
     data?: T;
     total?: number;
@@ -18,7 +20,7 @@ export const CreateByResponse = <T, R>(type: (new () => T), response?: IResponse
     if (!response) {
         return null;
     }
-    const {data} = response;
+    const { data } = response;
     if (Array.isArray(data)) {
         return data.map(item => {
             const obj = new type() as Object;
@@ -27,11 +29,10 @@ export const CreateByResponse = <T, R>(type: (new () => T), response?: IResponse
     }
 
     return Object.assign(new type() as Object, data);
-
 }
 
 export interface IPagingResponse<T> {
-    code: ResposneCode; //
+    code: ResponseCode; //
     message: string;
     data?: {
         records?: T[];
@@ -47,7 +48,7 @@ export interface IPagingResult<T> {
 /**
  * 请求返回code
  */
-export enum ResposneCode {
+export enum ResponseCode {
     success = 1,
     error = -1,
     tokenExpiry = -999,
@@ -98,7 +99,6 @@ const request = extend({
     errorHandler,
     credentials: 'include',
     timeout: 6000,
-
 });
 
 request.interceptors.request.use((url, options) => {
@@ -120,9 +120,9 @@ request.interceptors.request.use((url, options) => {
 
 const myErrorHandler = async (response: Response, options: any) => {
     if (response.status >= 400) {
-        throw {response, errorMessage: `Request(${response.status}): ${response.statusText}`};
+        throw { response, errorMessage: `Request(${response.status}): ${response.statusText}` };
     }
-    
+
     if (options.responseType === 'blob') {
         return response;
     }
@@ -134,12 +134,12 @@ const myErrorHandler = async (response: Response, options: any) => {
         return { response, errorMessage: `response json parse error: ${error}` };
     }
 
-    const { code = ResposneCode.error, message: _message = '服务异常' } = data as IResponse<any>;
-    if (code === ResposneCode.success) {
+    const { code = ResponseCode.error, message: _message = '服务异常' } = data as IResponse<any>;
+    if (code === ResponseCode.success) {
         return data;
     }
 
-    if (code === ResposneCode.tokenExpiry) {
+    if (code === ResponseCode.tokenExpiry) {
         // token expiry
         cleanLocalUser();
         history.push('/user/login');
@@ -161,5 +161,119 @@ const myErrorHandler = async (response: Response, options: any) => {
 request.interceptors.response.use(async (response, options) => {
     return myErrorHandler(response, options);
 }, { global: false });
+
+
+export interface IRequestParamFilter {
+    key: string;
+    value?: Key;
+    range?: [Key | undefined, Key | undefined];
+    values?: Key[];
+}
+
+/**
+ * 通用请求参数
+ */
+export interface IRequestParam {
+    module?: string;
+    /**
+     * 请求的筛选
+     * key： 要筛选的字段
+     * value：单值
+     * range: 范围
+     * values: 多值
+     */
+    filters?: IRequestParamFilter[];
+
+    /**
+     * 请求分页
+     */
+    page?: number;
+
+    /**
+     * 请求分页大小
+     */
+    pageSize?: number;
+
+    /**
+     * 按指定字段排序
+     */
+    sorter?: Key,
+
+    /**
+     * 排序规则
+     */
+    order?: string,
+}
+
+/**
+ * 构建请求参数
+ * @param filters 
+ * @param page 
+ * @param pageSize 
+ * @param sorter 
+ * @param order 
+ * @returns 
+ */
+export const createRequestParam = (
+    model: string,
+    filters?: IFilterItem[],
+    page?: number,
+    pageSize?: number,
+    sorter?: Key,
+    order?: SortOrder
+): IRequestParam => {
+
+    const _filters = filters?.filter(item => item.dataIndex)
+        .map(item => {
+            let option0: IOption = {};
+            let option1: IOption = {};
+            if (item.values && item.values.length > 0) {
+                option0 = item.values[0];
+            }
+            if (item.values && item.values.length > 1) {
+                option1 = item.values[1];
+            }
+
+            let _value: Key | undefined = undefined;
+            let _range: [Key | undefined, Key | undefined] | undefined = undefined;
+            let _values: Key[] | undefined = undefined;
+            switch (item.type) {
+                case FilterTypeEnum.text:
+                    _value = option0.value;
+                    break;
+                case FilterTypeEnum.number:
+                case FilterTypeEnum.date:
+                case FilterTypeEnum.day:
+                case FilterTypeEnum.time:
+                    if (option0.value === undefined && option1.value === undefined) {
+                        break;
+                    }
+                    _range = [option0.value, option1.value];
+                    break;
+                case FilterTypeEnum.general:
+                case FilterTypeEnum.include:
+                    _values = item.values?.map(value => value.value as Key);
+                    break;
+            }
+
+            const paramFilter: IRequestParamFilter = {
+                key: item.dataIndex!,
+                value: _value,
+                range: _range,
+                values: _values
+            };
+
+            return paramFilter;
+        }).filter(item => item.value || item.range || (item.values ?? []).length > 0) ?? [];
+
+    return {
+        module: model,
+        filters: _filters.length > 0 ? _filters : undefined,
+        page: page,
+        pageSize: pageSize,
+        sorter: sorter,
+        order: order?.toUpperCase() as string
+    }
+}
 
 export default request;

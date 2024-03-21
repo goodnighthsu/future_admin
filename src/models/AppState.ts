@@ -61,16 +61,31 @@ export const cleanLocalUser = () => {
     App.instance().currentUser = undefined;
 }
 
-export const tableHeight = 68 + 16;
+export const nutHeight = 60 + 2;
 
 /**
  * 所有页面的状态
  */
-export const enum PageState {
+export const enum PageStateEnum {
+    /**
+     * 合约列表
+     */
+    instrument = 'InstrumentListState',
+
+    /**
+     * 行情
+     */
+    market = 'MarketListState',
+    
     /**
      * 交易日历
      */
     tradingCalendar = 'TradingCalendarState',
+
+    /**
+     * 系统用户列表
+     */
+    sysUserList = 'SysUserListState',
 }
 
 /**

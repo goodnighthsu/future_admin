@@ -57,17 +57,19 @@
     content: '*';
 }
 
+// 导航栏高度
 @navHeight: 56px;
-@nutHeight: 68px;
-@pageSepartor: 2px;
+// 花生屑高度
+@nutHeight: 60px;
+@borderSepartor: 3px;
 @toolbarHeight: 48px;
 
 // app
+// 页面高度撑满屏幕 = 视窗高度 - 导航栏高度 花生屑高度 - border
 .page {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - @navHeight - @nutHeight - @pageSepartor);
-    margin-top: @pageSepartor;
+    height: calc(100vh - @navHeight - @nutHeight - @borderSepartor);
 }
 
 .popPage {
@@ -110,7 +112,7 @@
 }
 
 .container  {
-    height:calc(100vh - @navHeight - @nutHeight - @pageSepartor - @toolbarHeight);
+    height:calc(100vh - @navHeight - @nutHeight - @borderSepartor - @toolbarHeight);
     background-color: white;
     overflow-y: scroll;
     padding: 8px;
@@ -118,6 +120,7 @@
 
 .tableWrapper {
     flex: 1;
+    margin-top: 1px;
     padding: 8px;
     background-color: white;
 }

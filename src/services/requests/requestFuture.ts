@@ -7,39 +7,41 @@ import {
     MarketData,
 } from '@/models/models/InstrumentModel';
 import { TradingModel } from '@/models/models/TradingModel';
-import request, { CreateByResponse, IResponse } from '@/utils/request';
+import request, { CreateByResponse, IPagingResponse, IRequestParam, IResponse } from '@/utils/request';
 
 export const requestFuture = {
     // MARK: - 获取交易日合约分页列表 
     /**
      * 获取合约列表
-     * @param keyword 关键字
-     * @param page 页码
-     * @param pageSize 页大小
+     * @param param 请求参数
      * @returns 合约分页列表
      */
     instrumentList: async (
-        keyword?: string,
-        page?: number,
-        pageSize?: number,
-    ) => {
+        param: IRequestParam
+    ): Promise<IPagingResponse<InstrumentModel> | undefined> => {
         const response: IResponse<InstrumentModel[]> | undefined = await request(
             '/ctpslave/market/instruments',
             {
                 method: 'get',
-                params: {
-                    keyword: keyword ?? '',
-                    page: page,
-                    pageSize: pageSize,
-                },
+                params: param,
             },
         );
 
-        response?.data?.sort((a, b) => a.instrumentID.localeCompare(b.instrumentID));
-        return response;
+        if (!response) {
+            return response;
+        }
+
+        return {
+            code: response.code,
+            message: response.message,
+            data: {
+                records: response.data,
+                total: response.total ?? 0
+            }
+        };
     },
 
-     // MARK: - 获取交易日合约列表 
+    // MARK: - 获取交易日合约列表 
     /**
      * 获取交易日的合约列表
      * @param tradingDay 交易日
@@ -88,7 +90,6 @@ export const requestFuture = {
 
         return response?.data;
     },
-
 
     // MARK: - 获取合约交易日市场信息
     /**

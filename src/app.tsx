@@ -72,6 +72,7 @@ const loadMenu = async (permissions: SysPermissionModel[]) => {
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
     return {
         menu: {
+            locale: false,
             request: () => {
                 return loadMenu(App.instance().currentUser?.permissions ?? [])
             },
@@ -80,6 +81,10 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         // waterMarkProps: {
         //   content: initialState?.currentUser?.name,
         // },
+        breadcrumbRender: _ => { 
+            //  hidden breadcrumb 
+            return
+        },
         footerRender: () => null,
         onPageChange: () => {
             const { location } = history;

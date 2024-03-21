@@ -1,17 +1,12 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useModel } from "@umijs/max";
+import React from 'react';
 import { PageContainer } from "@ant-design/pro-components";
-import { Input, Table } from "antd";
 import styles from './InstrumentList.less';
 import { requestFuture } from '@/services/requests/requestFuture';
 import {InstrumentModel} from '@/models/models/InstrumentModel';
-import Pagination from 'antd/es/pagination';
-import { tableHeight } from '@/models/AppState';
-import { debounce } from 'lodash';
-import { SearchOutlined } from '@ant-design/icons';
-import { ColumnType } from 'antd/lib/table';
-import ToolBar from '@/components/ToolBar/ToolBar';
-import { IColumnOptional } from '@/components/ToolBar/IToolBarFilter';
+import { PageStateEnum } from '@/models/AppState';
+import { FilterTypeEnum } from '@/components/ToolBar/FilterForm';
+import { IColumnOptional } from '@/components/ToolBar/ToolBarFilter';
+import FilterList from '@/components/FilterList/FilterList';
 
 /**
  * 合约
@@ -19,75 +14,29 @@ import { IColumnOptional } from '@/components/ToolBar/IToolBarFilter';
  * @returns 
  */
 const InstrumentList:React.FC = (props) => {
-    // useModel
-    const { page, updatePaging, pageSize  } = useModel('InstrumentListState');
-
-    // MARK: - ----------------- state-----------------
-    // state
-    const [datas, setDatas] = useState<InstrumentModel[]>([]);
-    const [total, setTotal] = useState<number>(0);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [keyword, setKeyword] = useState<string | undefined>(undefined);
-
-    const tableWrapRef = useRef<HTMLDivElement | null>(null);
-
     // MARK: - --- methods ---
-    // MARK: -  load 加载行情数据
-    const load = async (keyword?: string, page?: number, pageSize?: number) => {
-        setLoading(true);
-        const response = await requestFuture.instrumentList(
-            keyword, 
-            page, 
-            pageSize);
-        setLoading(false);
-        if (!response) {
-            return;
-        }
-        setDatas(response.data ?? []);
-        setTotal(response.total ?? 0);
-    }
-
-    const loadData = useCallback(
-        debounce((keyword, page, pageSize) => {
-                updatePaging(page, pageSize); 
-                load(keyword, page, pageSize);
-            }, 500),
-        []
-    ) 
-    
-    /**
-     * page chage
-     * 
-     * @param page 
-     * @param pageSize 
-     */
-    const changePage = (page: number, pageSize: number) => {
-        updatePaging(page, pageSize); 
-        load(keyword, page, pageSize);
-    }
-
     const columns: IColumnOptional<InstrumentModel>[] = [
-        { title: 'ID', dataIndex: 'id', width: 40},
-        { title: '合约名称', dataIndex: 'instrumentName', width: 160},
-        { title: '合约代码', dataIndex: 'instrumentID', width: 160},
-        { title: '基础商品代码', dataIndex: 'underlyingInstrID', width: 120},
-        { title: '产品类型', dataIndex: 'productClass', width: 80},
-        { title: '交割年份', dataIndex: 'deliveryYear', width: 80},
-        { title: '交割月', dataIndex: 'deliveryMonth', width: 80},
-        { title: '市价单最大下单量', dataIndex: 'maxMarketOrderVolume', width: 140},
-        { title: '市价单最小下单量', dataIndex: 'minMarketOrderVolume', width: 140},
+        { title: 'ID', dataIndex: 'id', width: 40, filterType: FilterTypeEnum.number },
+        { title: '合约名称', dataIndex: 'instrumentName', width: 160, filterType: FilterTypeEnum.text},
+        { title: '合约代码', dataIndex: 'instrumentID', key: 'insturmentID', width: 160},
+        { title: '基础商品代码', dataIndex: 'underlyingInstrID', width: 120, filterType: FilterTypeEnum.text},
+        { title: '产品类型', dataIndex: 'productClass', width: 80, filterType: FilterTypeEnum.text},
+        { title: '交割年份', dataIndex: 'deliveryYear', width: 80, filterType: FilterTypeEnum.date},
+        { title: '交割月', dataIndex: 'deliveryMonth', width: 80, filterType: FilterTypeEnum.time},
+        { title: '市价单最大下单量', dataIndex: 'maxMarketOrderVolume', width: 140, filterType: FilterTypeEnum.day},
+        { title: '市价单最小下单量', dataIndex: 'minMarketOrderVolume', width: 140, filterType: FilterTypeEnum.number},
         { title: '限价单最大下单量', dataIndex: 'maxLimitOrderVolume', width: 140},
         { title: '限价单最小下单量', dataIndex: 'minLimitOrderVolume', width: 140},
         { title: '合约数量乘数', dataIndex: 'volumeMultiple', width: 120},
         { title: '最小变动价位', dataIndex: 'priceTick', width: 120},
-        { title: '创建日', dataIndex: 'createDate', width: 80},
-        { title: '上市日', dataIndex: 'openDate', width: 80},
+        { title: '创建日', dataIndex: 'createDate', width: 80, filterType: FilterTypeEnum.date},
+        { title: '上市日', dataIndex: 'openDate', width: 80, filterType: FilterTypeEnum.time},
         { title: '到期日', dataIndex: 'expireDate', width: 80},
         { title: '开始交割日', dataIndex: 'startDelivDate', width: 120},
         { title: '结束交割日', dataIndex: 'endDelivDate', width: 120},
         { title: '合约生命周期状态', dataIndex: 'instLifePhase', width: 160}, 
         { title: '当前是否交易', key: 'isTrading', width: 120,
-            render: (item) => {
+            render: (item: InstrumentModel) => {
                 return item.isTrading ? '是' : '否';
             }
         },
@@ -105,31 +54,16 @@ const InstrumentList:React.FC = (props) => {
         { title: '交易所代码', dataIndex: 'exchangeID', width: 100},
     ]
 
-    // effects
-    useEffect(() => {
-        load();
-    }, [])
 
     // MARK: - render
     return (
         <PageContainer>
             <div className={styles.page}>
-                <ToolBar columns={columns}/>
-                <div className={styles.toolbar}>
-                    <div className={styles.toolbar_left}>
-                        <Input style={{flex: '0 0 200px'}} allowClear value={keyword} prefix={<SearchOutlined />}
-                            onChange={event => {setKeyword(event.currentTarget.value); loadData(event.currentTarget.value, 1, pageSize)}}
-                        />
-                    </div>
-                    <div className={styles.toolbar_right}>
-                        <Pagination current={page} pageSize={pageSize} total={total} onChange={changePage}/>
-                    </div>
-                </div>
-                <div className={styles.tableWrapper} ref={tableWrapRef}>
-                    <Table className={styles.table} size="small" dataSource={datas} columns={columns} bordered rowKey={'instrumentID'} pagination={false}
-                        scroll={{y: (tableWrapRef.current?.offsetHeight ?? tableHeight) - tableHeight,  x: 'max-content'}}
-                        loading={{delay: 300, spinning: loading}}/>
-                </div>
+                <FilterList 
+                    columns={columns} 
+                    pageState={PageStateEnum.instrument}
+                    request={requestFuture.instrumentList} 
+                />
             </div>  
         </PageContainer>
     )

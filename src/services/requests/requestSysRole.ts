@@ -1,12 +1,24 @@
 import { SysUserModel } from "@/models/SysUserListState";
 import { SysRoleModel } from "@/models/SysRoleListState";
-import request, { IPagingResponse, IPagingResult, IResponse } from "@/utils/request";
+import request, { IPagingResponse, IPagingResult, IRequestParam, IResponse } from "@/utils/request";
 import { SysPermissionModel } from "@/models/models/SysPermissionModel";
+import { requestCommon } from "./requestCommon";
 
 /**
  * 角色接口
  */
 export const requestSysRole = {
+
+    all: async() => {
+        const params: IRequestParam ={
+            module: 'sysRole',
+            pageSize: -1
+        } 
+        const response: IPagingResponse<SysRoleModel> | undefined  = await requestCommon.list(params);
+
+        return response?.data?.records ?? [];
+    }, 
+
     /**
      * 角色列表
      * 
