@@ -1,4 +1,4 @@
-import { SysUserModel } from "@/models/SysUserListState";
+import { SysUserModel } from "@/models/models/SysUserModel";
 import request, { IResponse } from "@/utils/request";
 
 export const requestSysUser = {

@@ -147,7 +147,7 @@ const FilterList = forwardRef(<RecordType,>(props: IFilterList<RecordType>, ref:
             <div className={styles.tableWrapper} ref={tableWrapRef}>
                 <Table className={styles.table} size="small"
                     dataSource={datas}
-                    columns={columnSelecteds}
+                    columns={columnSelecteds?.filter(column => column.isShow)}
                     rowKey={'id'}
                     bordered
                     pagination={false}

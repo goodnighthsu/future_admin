@@ -1,7 +1,7 @@
 import { requestSysUser } from "@/services/requests/requestSysUser";
 import { useModel } from "@umijs/max";
-import { useCallback, useState } from "react"
-import { SysUserModel } from "./SysUserListState"
+import { useCallback, useState } from "react";
+import { SysUserModel } from "./models/SysUserModel";
 
 const CURRENT_USER = 'currentUser';
 
@@ -66,7 +66,7 @@ export const nutHeight = 60 + 2;
 /**
  * 所有页面的状态
  */
-export const enum PageStateEnum {
+export enum PageStateEnum {
     /**
      * 合约列表
      */

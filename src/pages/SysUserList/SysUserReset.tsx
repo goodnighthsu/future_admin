@@ -1,4 +1,4 @@
-import { SysUserModel } from '@/models/SysUserListState';
+import { SysUserModel } from '@/models/models/SysUserModel';
 import { requestSysUser } from '@/services/requests/requestSysUser';
 import { Button, Input, Switch, message } from 'antd';
 import { useEffect, useState } from 'react';

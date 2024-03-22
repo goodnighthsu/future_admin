@@ -182,10 +182,11 @@ export interface IFilterForm {
 
     /**
      * 筛选内容变更
-     * @param filterItem 
+     * @param filterItem 选择的筛选
+     * @param datas 所有筛选项
      * @returns 
      */
-    onChange: (filterItem: IFilterItem) => void;
+    onChange: (filterItem: IFilterItem, datas: IOption[]) => void;
 }
 
 /**
@@ -232,7 +233,7 @@ const FilterForm: React.FC<IFilterForm> = (props) => {
     ]
 
     /**
-     * 选项类型允许拖动的colomns
+     * 选项类型允许拖动的columns
      */
     const dragabelColumns = [
         {
@@ -359,7 +360,7 @@ const FilterForm: React.FC<IFilterForm> = (props) => {
         }
         item.values = _values;
         item.condition = filterCondition;
-        onChange(item);
+        onChange(item, result);
     }
 
     /**

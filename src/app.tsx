@@ -6,12 +6,14 @@ import { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-import { SysUserModel } from './models/SysUserListState';
-import { MenuDataItem } from '@umijs/route-utils';
-import { StateEnum } from './models/BaseModel';
-import { App } from '@/models/AppState';
+import { SysUserModel } from './models/models/SysUserModel';
 import { SysPermissionModel } from './models/models/SysPermissionModel';
-import { isDev } from './utils/utils';
+import { StateEnum } from './models/models/BaseModel';
+import { MenuDataItem } from '@umijs/route-utils';
+import { App, PageStateEnum } from '@/models/AppState';
+import { isDev, localUserState } from './utils/utils';
+import { useModel } from "@umijs/max";
+import { IToolBarState } from './models/models/ToolBarState';
 
 const loginPath = '/user/login';
 
@@ -25,7 +27,6 @@ export async function getInitialState(): Promise<{
 }> {
     if (window.location.pathname !== loginPath) {
         const currestUser = await App.initLocalUser();
-
         return {
             currentUser: currestUser,
             settings: defaultSettings,
@@ -70,6 +71,17 @@ const loadMenu = async (permissions: SysPermissionModel[]) => {
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+
+    const allState = {}
+    for (let key in PageStateEnum) {
+        const state = useModel(PageStateEnum.sysUserList) as IToolBarState;
+        allState[PageStateEnum[key]] = state;
+    }
+
+    window.onbeforeunload = () => {
+        localUserState.saveAll(allState);
+    };
+
     return {
         menu: {
             locale: false,

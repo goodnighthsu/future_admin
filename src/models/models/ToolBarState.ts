@@ -50,14 +50,16 @@ export interface IToolBarState {
  * 工具栏状态
  * @returns 
  */
-const ToolBarState = (defautSorter?: Key, defaultOrder?: SortOrder): IToolBarState => {
-    const [columnSelecteds, setColumnSelecteds] = useState<IColumnOptional<any>[]>([]);
+const ToolBarState = (defautSorter?: Key, defaultOrder?: SortOrder,
+        defaultSelecteds?: IColumnOptional<any>[]
+    ): IToolBarState => {
+    const [columnSelecteds, setColumnSelecteds] = useState<IColumnOptional<any>[]>(defaultSelecteds ?? []);
     const updateColumnSelecteds = useCallback((datas: IColumnOptional<any>[]) => {
         setColumnSelecteds(datas);
         columnsRef.current = datas;
     }, [columnSelecteds]);
 
-    const columnsRef = useRef<IColumnOptional<any>[]>();
+    const columnsRef = useRef<IColumnOptional<any>[]>(defaultSelecteds ?? []);
 
     const [filters, setFilters] = useState<IFilterItem[]>();
     const updateFilters = useCallback((datas: IFilterItem[]) => {

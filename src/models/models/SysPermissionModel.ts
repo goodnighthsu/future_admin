@@ -1,5 +1,5 @@
 import { App } from "../AppState";
-import { StateEnum } from "../BaseModel";
+import { StateEnum } from "./BaseModel";
 
 /**
  * 系统权限

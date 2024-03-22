@@ -1,5 +1,5 @@
-import { SysUserModel } from "@/models/SysUserListState";
-import { SysRoleModel } from "@/models/SysRoleListState";
+import { SysUserModel } from "@/models/models/SysUserModel";
+import { SysRoleModel } from "@/models/models/SysRoleModel";
 import request, { IPagingResponse, IPagingResult, IRequestParam, IResponse } from "@/utils/request";
 import { SysPermissionModel } from "@/models/models/SysPermissionModel";
 import { requestCommon } from "./requestCommon";

@@ -1,11 +1,11 @@
-import { SysRoleModel } from "@/models/SysRoleListState";
+import { SysRoleModel } from "@/models/models/SysRoleModel";
 import { requestSysRole } from "@/services/requests/requestSysRole";
 import { Button, Divider } from "antd"
 import { useEffect, useState } from "react";
 import styles from './RolePermission.less';
 import { CheckedType, SysPermissionModel } from "@/models/models/SysPermissionModel";
 import MenuCheckbox from "./components/MenuCheckbox";
-import { StateEnum } from "@/models/BaseModel";
+import { StateEnum } from "@/models/models/BaseModel";
 
 /**
  * 角色权限配置

@@ -1,4 +1,4 @@
-import { StateEnum } from "./models/BaseModel";
+import { StateEnum } from "./models/models/BaseModel";
 import { SysUserModel } from "./models/SysUserListState";
 import { SysPermissionModel } from "./models/models/SysPermissionModel";
 

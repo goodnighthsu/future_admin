@@ -1,26 +1,7 @@
-import { BaseModel, StateEnum } from "./BaseModel";
-import { SysRoleModel } from './SysRoleListState';
 import ToolBarState from './models/ToolBarState';
 import PaginationState from './models/PaginationState';
-import { SysPermissionModel } from "./models/SysPermissionModel";
-
-/**
- * 系统用户
- */
-export interface SysUserModel extends BaseModel {
-    id?: number;
-    account: string;
-    password?: string;
-    mobile?: string;
-    detail?: string;
-    avatarUrl?: string;
-    state?: StateEnum;
-    roleId?: number;
-
-    role?: SysRoleModel;
-    permissions?: SysPermissionModel[];
-    token?: string;
-}
+import { PageStateEnum } from "./AppState";
+import { localUserState } from "@/utils/utils";
 
 /**
  * SysUserList 账号列表页state
@@ -28,7 +9,7 @@ export interface SysUserModel extends BaseModel {
 // let init = true;
 export default () => {
     return {
-        ...ToolBarState('id', 'descend'),
+        ...ToolBarState('id', 'descend', localUserState.get(PageStateEnum.sysUserList)),
         ...PaginationState(),
     };
 };

@@ -3,7 +3,7 @@ import ToolBarFilter, { IColumnOptional } from './ToolBarFilter';
 import styles from './ToolBar.less';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
-import { FilterTypeEnum, IFilterItem } from './FilterForm';
+import { FilterTypeEnum, IFilterItem, IOption } from './FilterForm';
 import { PageStateEnum } from '@/models/AppState';
 import { useModel } from '@umijs/max';
 import { IToolBarState } from '@/models/models/ToolBarState';
@@ -37,11 +37,6 @@ const ToolBar: React.FC<IToolBar<any>> = (props) => {
 
     // MARK: - state
     const { columnSelecteds, updateColumnSelecteds, columnsRef, filters = [], updateFilters, } = useModel(pageState) as IToolBarState;
-    /**
-     * 内部修改用
-     * 对列添加的默认排序功能
-     */
-    const [innerColumns, setInnerColumns] = useState<IColumnOptional<any>[]>(columns);
     const [moreFilters, setMoreFilters] = useState<IFilterItem[]>([]);
     const [searchValue, setSearchValue] = useState<string>('');
 
@@ -49,40 +44,60 @@ const ToolBar: React.FC<IToolBar<any>> = (props) => {
      *  初始筛选和列选择
      */
     useEffect(() => {
-        // 列选没有初始，并且有更新列选择（updateColumnSelecteds）
-        if ((!columnSelecteds || columnSelecteds.length === 0) && updateColumnSelecteds) {
-            // 默认显示每一列
-            columns.forEach((item, index) => {
-                item.isShow = true;
-                // 默认添加鼠标移入显示排序按钮，移除隐藏
-                item.onHeaderCell = (column) => {
-                    return {
-                        onMouseEnter: () => {
-                            const _columns = column as ColumnType<any>;
-                            const selected = columnsRef.current?.find(item => item.dataIndex === _columns.dataIndex);
-                            if (!selected) {
-                                return;
-                            }
-
-                            selected.sorter = true;
-                            updateColumnSelecteds([...columnsRef.current ?? []]);
-                        },
-                        onMouseLeave: () => {
-                            const _columns = column as ColumnType<any>;
-                            const selected = columnsRef.current?.find(item => item.dataIndex === _columns.dataIndex);
-                            if (!selected) {
-                                return;
-                            }
-                            selected.sorter = false;
-                            updateColumnSelecteds([...columnsRef.current ?? []]);
-                        },
-                    }
-                }
-            });
-            setInnerColumns([...columns]);
-            updateColumnSelecteds([...columns]);
+        if (!columns || columns.length === 0) {
+            return;
         }
+        // 列默认添加鼠标移入显示排序按钮，移除隐藏
+        // Todo 这个函数内动updateColumnSelecteds 会造成多次render
+        columns.forEach((item) => {
+            item.onHeaderCell = (column) => {
+                return {
+                    onMouseEnter: () => {
+                        const _columns = column as ColumnType<any>;
+                        const selected = columnsRef.current?.find(item => item.dataIndex === _columns.dataIndex);
+                        if (!selected) {
+                            return;
+                        }
 
+                        selected.sorter = true;
+                        updateColumnSelecteds([...columnsRef.current ?? []]);
+                    },
+                    onMouseLeave: () => {
+                        const _columns = column as ColumnType<any>;
+                        const selected = columnsRef.current?.find(item => item.dataIndex === _columns.dataIndex);
+                        if (!selected) {
+                            return;
+                        }
+                        selected.sorter = false;
+                        updateColumnSelecteds([...columnsRef.current ?? []]);
+                    },
+                }
+            }
+        });
+        
+        if (!columnSelecteds || columnSelecteds.length === 0) {
+            // 列选没有初始，并且有更新列选择（updateColumnSelecteds）
+            // 默认显示每一列
+            columns.forEach((item) => {
+                item.isShow = true;
+            });
+            // setInnerColumns([...columns]);
+            updateColumnSelecteds([...columns]);
+        } else {
+             // 列有初始，且是从本地localStorage中反序列化获取的
+             // 会丢失columnSelecteds[0] onHeaderCell方法
+             // 重新从columns中获取
+            if (!columnSelecteds[0].onHeaderCell) {
+                columnSelecteds.forEach((item) => {
+                    const innerColumn = columns.find( a => a.title === item.title)!;
+                    item.onHeaderCell = innerColumn.onHeaderCell;
+                    item.render = innerColumn.render
+                });
+                // 排序过的
+                updateColumnSelecteds([...columnSelecteds]);
+            }
+        }
+        
         // 初始化筛选
         if (filters.length === 0 && updateFilters) {
             const _options: IFilterItem[] = columns.filter(item => item.isFilter ?? true)
@@ -188,28 +203,29 @@ const ToolBar: React.FC<IToolBar<any>> = (props) => {
                                     .map(item => {
                                         return { value: `${item.title}`, label: `${item.title}` };
                                     }),
-                                datas: columns.map(item => {
+                                datas: columnSelecteds.map(item => {
                                     return { value: `${item.title}`, label: `${item.title}` };
                                 })
                             }
                         }
-                        onChange={item => {
+                        onChange={(item: IFilterItem, options: IOption[] = []) => {
+                            // item.values 选择的项IOption[]，selectedValues选择项的标题 
+                            // options 所有可选择的项
                             const selectedValues = item.values?.map(item => item.value) ?? [];
-                            innerColumns.forEach(option => {
-                                option.isShow = selectedValues.includes(`${option.title}`);
+                            // 按所有可选择的项options 返回对应次序的_columns
+                            const _columns = options.map(option => {
+                                return columns.find(c => c.title === option.value)!;
                             });
-                            let _selecteds: IColumnOptional<any>[] = [];
-                            selectedValues.forEach(value => {
-                                const option = innerColumns.find(columnItem => columnItem.title === value);
-                                if (option) {
-                                    _selecteds.push(option);
-                                }
-                            });
-                            // 列不选显示全部
+                            
                             if (selectedValues.length === 0) {
-                                _selecteds = innerColumns;
+                                // 列不选显示全部
+                                _columns.forEach(c => c.isShow = true);
+                            }else {
+                                _columns.forEach( (c: IColumnOptional<any>) => {
+                                    c.isShow = selectedValues.includes(c.title as string);
+                                });
                             }
-                            updateColumnSelecteds([..._selecteds]);
+                            updateColumnSelecteds([..._columns]);
                         }}
                     />
                 }

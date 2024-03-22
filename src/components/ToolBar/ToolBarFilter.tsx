@@ -33,9 +33,10 @@ export interface IToolBarFilter {
     /**
      * 筛选改变
      * @param filterItem 筛选项
+     * @param datas 所有可以选择的项
      * @returns 
      */
-    onChange: (changeItem: IFilterItem) => void;
+    onChange: (changeItem: IFilterItem, datas?: IOption[]) => void;
 
     /**
      * 删除
@@ -43,7 +44,6 @@ export interface IToolBarFilter {
      * @returns 
      */
     onDelete?: () => void;
-
 
     /**
      * 固定表头
@@ -149,8 +149,8 @@ const ToolBarFilter: React.FC<IToolBarFilter> = (props) => {
                     // 筛选弹出框
                     <FilterForm filterItem={filterItem}
                         isDragable={isDragable}
-                        onChange={item => {
-                            onChange(item);
+                        onChange={(item, r) => {
+                            onChange(item, r);
                             setFilterTitle(getFilterButtonTitle(item));
                             setIsOpen(false);
                         }}

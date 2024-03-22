@@ -4,7 +4,7 @@ import { PageContainer } from "@ant-design/pro-components";
 import { Button, message, Modal, Pagination, Popconfirm, Table, Tooltip } from "antd";
 import styles from './SysRoleList.less';
 import SysRoleAdd from "./SysRoleAdd";
-import { SysRoleModel } from "@/models/SysRoleListState";
+import { SysRoleModel } from "@/models/models/SysRoleModel";
 import { DeleteOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 import RolePermission from "./RolePermission";
 import { requestSysRole } from "@/services/requests/requestSysRole";

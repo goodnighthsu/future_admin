@@ -1,4 +1,4 @@
-import { SysRoleModel } from '@/models/SysRoleListState';
+import { SysRoleModel } from '@/models/models/SysRoleModel';
 import { requestSysRole } from '@/services/requests/requestSysRole';
 import { UserOutlined } from '@ant-design/icons';
 import { Button, Input, message } from 'antd';

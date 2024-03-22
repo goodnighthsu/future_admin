@@ -2,13 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { PageContainer } from "@ant-design/pro-components";
 import { Button, Switch, Modal } from "antd";
 import styles from './SysUserList.less';
-import { SysUserModel } from '@/models/SysUserListState';
+import { SysUserModel } from '@/models/models/SysUserModel';
+import { SysRoleModel } from '@/models/models/SysRoleModel';
 import SysRoleSelect from '../SysRoleList/components/SysRoleSelect';
 import Tooltip from 'antd/es/tooltip';
 import { DeleteOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
 import Popconfirm from 'antd/es/popconfirm';
 import SysUserAdd from './SysUserAdd';
-import { SysRoleModel } from '@/models/SysRoleListState';
 import { requestSysUser } from '@/services/requests/requestSysUser';
 import { requestSysRole } from '@/services/requests/requestSysRole';
 import SysUserReset from './SysUserReset';
@@ -18,7 +18,7 @@ import { PageStateEnum } from '@/models/AppState';
 import { IColumnOptional } from '@/components/ToolBar/ToolBarFilter';
 import { FilterTypeEnum } from '@/components/ToolBar/FilterForm';
 import { requestCommon } from '@/services/requests/requestCommon';
-import { StateEnum } from '@/models/BaseModel';
+import { StateEnum } from '@/models/models/BaseModel';
 
 /**
  * 账号列表
@@ -143,7 +143,6 @@ const SysUserList: React.FC = (props) => {
                 <FilterList ref={filterListRef}
                     columns={columns}
                     pageState={PageStateEnum.sysUserList}
-                    // defaultParam={{sorter: 'id', order: 'descend'}}
                     request={requestCommon.list}
                 />
             </div>

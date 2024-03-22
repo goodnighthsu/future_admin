@@ -1,6 +1,6 @@
-import { StateEnum } from '@/models/BaseModel';
-import { SysRoleModel } from '@/models/SysRoleListState';
-import { SysUserModel } from '@/models/SysUserListState';
+import { StateEnum } from '@/models/models/BaseModel';
+import { SysRoleModel } from '@/models/models/SysRoleModel';
+import { SysUserModel } from '@/models/models/SysUserModel';
 import { requestSysRole } from '@/services/requests/requestSysRole';
 import { requestSysUser } from '@/services/requests/requestSysUser';
 import { MobileOutlined, UserOutlined } from '@ant-design/icons';
