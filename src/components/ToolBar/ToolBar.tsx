@@ -10,7 +10,7 @@ import { IToolBarState } from '@/models/models/ToolBarState';
 import { ColumnType } from 'antd/lib/table';
 import _ from 'lodash';
 
-export interface IToolBar<RecordType> extends React.FC {
+export interface IToolBar<RecordType> {
     /**
      * 列配置
      */
@@ -34,7 +34,7 @@ export interface IToolBar<RecordType> extends React.FC {
 /**
  * 工具栏
  */
-const ToolBar: React.FC<IToolBar<any>> = (props) => {
+const ToolBar: React.FC<IToolBar<any>> =(props) => {
     const { children, columns, pageState, onFilterChange } = props;
 
     // MARK: - state
