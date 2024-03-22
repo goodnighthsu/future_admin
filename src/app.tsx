@@ -74,7 +74,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
 
     const allState = {}
     for (let key in PageStateEnum) {
-        const state = useModel(PageStateEnum.sysUserList) as IToolBarState;
+        const state = useModel(PageStateEnum[key]) as IToolBarState;
         allState[PageStateEnum[key]] = state;
     }
 

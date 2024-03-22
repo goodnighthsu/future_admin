@@ -26,13 +26,14 @@ import { StateEnum } from '@/models/models/BaseModel';
  * @returns 
  */
 const SysUserList: React.FC = (props) => {
-
+    // state
     const [columns, setColumns] = useState<IColumnOptional<SysUserModel>[]>([]);
     const [openAdd, setOpenAdd] = useState<boolean>(false);
     const [openReset, setOpenReset] = useState<boolean>(false);
     const [selected, setSelected] = useState<SysUserModel | undefined>(undefined);
     const filterListRef = useRef<IFilterListCallback>(null);
 
+    // methods
     const clickDelete = async (item: SysUserModel) => {
         const response = await requestSysUser.delete([item]);
         if (!response) {
@@ -104,7 +105,7 @@ const SysUserList: React.FC = (props) => {
                             <Tooltip title='编辑'>
                                 <Button type='link' icon={<EditOutlined />}
                                     disabled={!auth(SysPermissionEnum.accountManageAccountUpdate)}
-                                    onClick={() => { setSelected(item); setOpenAdd(true); }} />
+                                    onClick={() => { setSelected(item); setOpenAdd(true);}} />
                             </Tooltip>
                             <Tooltip title='密码重置'>
                                 <Button type='link' icon={<RedoOutlined />}
@@ -132,21 +133,19 @@ const SysUserList: React.FC = (props) => {
 
     return (
         <PageContainer>
-            {/* <div className={styles.toolbar}>
-                <Button type='primary' onClick={() => { setSelected(undefined); setOpenAdd(true); }}
-                    disabled={!auth(SysPermissionEnum.accountManageAccountAdd)}
-                >
-                    创建
-                </Button>
-            </div> */}
             <div className={styles.page}>
                 <FilterList ref={filterListRef}
                     columns={columns}
                     pageState={PageStateEnum.sysUserList}
                     request={requestCommon.list}
-                />
+                >
+                    <Button type='primary' onClick={() => { setSelected(undefined); filterListRef.current?.load(); }}
+                        disabled={!auth(SysPermissionEnum.accountManageAccountAdd)}
+                    >
+                        创建
+                    </Button>
+                </FilterList>
             </div>
-
             {/* modal */}
             <Modal title={selected ? '编辑' : '创建'} centered destroyOnClose footer={null} open={openAdd} width='700px'
                 onCancel={() => setOpenAdd(false)}>

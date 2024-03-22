@@ -219,11 +219,6 @@ export interface IColumnOptional<RecordType> extends ColumnType<RecordType> {
     isShow?: boolean;
 
     /**
-     * 是否允许筛选
-     */
-    isFilter?: boolean;
-
-    /**
      * 筛选的数据
      */
     datas?: IOption[];

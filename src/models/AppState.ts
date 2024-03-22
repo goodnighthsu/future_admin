@@ -86,6 +86,11 @@ export enum PageStateEnum {
      * 系统用户列表
      */
     sysUserList = 'SysUserListState',
+
+    /**
+     * 系统角色列表
+     */
+    sysRoleList = 'SysRoleListState',
 }
 
 /**

@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { useModel } from "@umijs/max";
+import { useRef, useState } from "react";
 import { PageContainer } from "@ant-design/pro-components";
-import { Button, message, Modal, Pagination, Popconfirm, Table, Tooltip } from "antd";
+import { Button, message, Modal, Popconfirm, Tooltip } from "antd";
 import styles from './SysRoleList.less';
 import SysRoleAdd from "./SysRoleAdd";
 import { SysRoleModel } from "@/models/models/SysRoleModel";
@@ -9,6 +8,10 @@ import { DeleteOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons
 import RolePermission from "./RolePermission";
 import { requestSysRole } from "@/services/requests/requestSysRole";
 import { SysPermissionEnum, auth } from "@/models/models/SysPermissionModel";
+import FilterList, { IFilterListCallback } from "@/components/FilterList/FilterList";
+import { PageStateEnum } from "@/models/AppState";
+import { requestCommon } from "@/services/requests/requestCommon";
+import { FilterTypeEnum } from "@/components/ToolBar/FilterForm";
 
 /**
  * 角色列表
@@ -17,34 +20,14 @@ import { SysPermissionEnum, auth } from "@/models/models/SysPermissionModel";
  * @returns 
  */
 const SysRoleList: React.FC = (props) => {
-    // useModel
-    const { page, updatePaging, pageSize } = useModel('SysRoleListState');
 
     // state
-    const [datas, setDatas] = useState<SysRoleModel[]>([]);
-    const [total, setTotal] = useState<number>(0);
     const [isOpenAdd, setIsOpenAdd] = useState<boolean>(false);
     const [isOpenPermission, setIsOpenPermission] = useState<boolean>(false);
     const [selectedRole, setSelectedRole] = useState<SysRoleModel | undefined>(undefined);
-    const [loading, setLoading] = useState<boolean>(false);
+    const filterListRef = useRef<IFilterListCallback>(null);
 
     // methods
-    const load = async (page?: number, pageSize?: number) => {
-        setLoading(true);
-        const response = await requestSysRole.list(page, pageSize);
-        setLoading(false);
-        if (!response) {
-            return;
-        }
-        const { datas, total } = response;
-        setDatas(datas);
-        setTotal(total);
-    }
-
-    const changePage = (page: number, pageSize: number) => {
-        updatePaging(page, pageSize);
-    }
-
     const clickDelete = async (role: SysRoleModel) => {
         const response = await requestSysRole.delete([role]);
         if (!response) {
@@ -52,15 +35,15 @@ const SysRoleList: React.FC = (props) => {
         }
 
         message.success(`Delete role ${role.title} success`);
-        load();
+        filterListRef.current?.load();
     }
 
     const columns = [
-        { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
-        { title: '角色名', dataIndex: 'title', width: 200 },
-        { title: '备注', dataIndex: 'detail' },
-        { title: '更新时间', dataIndex: 'updateTime', width: 200 },
-        { title: '创建时间', dataIndex: 'createTime', width: 200 },
+        { title: 'ID', dataIndex: 'id', key: 'id', width: 80, filterType: FilterTypeEnum.number },
+        { title: '角色名', dataIndex: 'title', width: 200, filterType: FilterTypeEnum.text },
+        { title: '备注', dataIndex: 'detail', filterType: FilterTypeEnum.text  },
+        { title: '更新时间', dataIndex: 'updateTime', width: 200, filterType: FilterTypeEnum.date },
+        { title: '创建时间', dataIndex: 'createTime', width: 200, filterType: FilterTypeEnum.date },
         {
             title: '操作',
             width: 140,
@@ -70,7 +53,7 @@ const SysRoleList: React.FC = (props) => {
                         <Tooltip title='编辑'>
                             <Button className={styles.cell_edit} type='link' icon={<EditOutlined />}
                                 disabled={item.id === 1 || !auth(SysPermissionEnum.accountManageRoleUpdate)}
-                                onClick={() => { setSelectedRole(item); setIsOpenAdd(true) }} />
+                                onClick={() => {setSelectedRole(item); setIsOpenAdd(true) }} />
                         </Tooltip>
                         <Tooltip title='设置'>
                             <Button className={styles.cell_edit} type='link' icon={<SettingOutlined />}
@@ -92,34 +75,32 @@ const SysRoleList: React.FC = (props) => {
         }
     ]
 
-    // effect
-    useEffect(() => {
-        load(page, pageSize);
-    }, [page, pageSize]);
-
     return (
         <PageContainer>
             {/* paging */}
-            <div className={styles.toolbar}>
-                <Button
-                    type='primary'
-                    disabled={!auth(SysPermissionEnum.accountManageRoleAdd)}
-                    onClick={() => { setSelectedRole(undefined); setIsOpenAdd(true) }}
+            <div className={styles.page}>
+                <FilterList ref={filterListRef}
+                    columns={columns}
+                    pageState={PageStateEnum.sysRoleList}
+                    request={requestCommon.list}
                 >
-                    创建
-                </Button>
-                <Pagination current={page} pageSize={pageSize} total={total} onChange={changePage} />
-            </div>
-            {/* table */}
-            <div className={styles.tableWrapper}>
-                <Table className={styles.table} size="small" dataSource={datas} columns={columns} pagination={false} bordered rowKey={'id'} loading={{ delay: 300, spinning: loading }} />
+                    <Button type='primary' disabled={!auth(SysPermissionEnum.accountManageAccountAdd)}
+                        onClick={() => {{setSelectedRole(undefined); setIsOpenAdd(true) }}}
+                    >
+                        创建
+                    </Button>
+                </FilterList>
             </div>
             {/* modal */}
             {/* sys role add */}
             <Modal
                 title={selectedRole ? '编辑' : '创建'} centered destroyOnClose footer={null} open={isOpenAdd} width='400px'
                 onCancel={() => setIsOpenAdd(false)}>
-                <SysRoleAdd sysRole={selectedRole} onClose={() => { setIsOpenAdd(false); load() }} />
+                <SysRoleAdd sysRole={selectedRole} 
+                    onClose={() => { 
+                        setIsOpenAdd(false); filterListRef.current?.load(); 
+                    }} 
+                />
             </Modal>
             {/* role permission manage */}
             <Modal title='权限管理' centered open={isOpenPermission} destroyOnClose

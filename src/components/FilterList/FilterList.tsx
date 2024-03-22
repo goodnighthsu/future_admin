@@ -7,7 +7,7 @@ import { IPaginationState } from "@/models/models/PaginationState";
 import { Key, SortOrder, SorterResult } from "antd/lib/table/interface";
 import { IColumnOptional } from "../ToolBar/ToolBarFilter";
 import { Pagination, Table } from "antd";
-import { useEffect, useLayoutEffect, useRef, useState, useImperativeHandle, forwardRef, ForwardedRef } from "react";
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState, useImperativeHandle, forwardRef, ForwardedRef } from "react";
 import { IPagingResponse, IRequestParam, createRequestParam } from "@/utils/request";
 
 export interface IFilterList<RecordType> {
@@ -33,6 +33,8 @@ export interface IFilterList<RecordType> {
     request: (
         param: IRequestParam
     ) => Promise<IPagingResponse<RecordType> | undefined>;
+
+    children?: ReactNode,
 }
 
 export interface IFilterListCallback {
@@ -41,7 +43,7 @@ export interface IFilterListCallback {
 
 const FilterList = forwardRef(<RecordType,>(props: IFilterList<RecordType>, ref: ForwardedRef<IFilterListCallback>) => {
     // props
-    const { columns, pageState, request } = props;
+    const { children, columns, pageState, request } = props;
 
     // useModel
     const {
@@ -70,6 +72,9 @@ const FilterList = forwardRef(<RecordType,>(props: IFilterList<RecordType>, ref:
         switch (pageState) {
             case PageStateEnum.sysUserList:
                 model = 'sysUser';
+                break;
+            case PageStateEnum.sysRoleList:
+                model = 'sysRole';
                 break;
             case PageStateEnum.instrument:
                 model = 'instrument';
@@ -143,7 +148,9 @@ const FilterList = forwardRef(<RecordType,>(props: IFilterList<RecordType>, ref:
     // render
     return (
         <>
-            <ToolBar columns={columns} pageState={pageState} onFilterChange={filterChange} />
+            <ToolBar columns={columns} pageState={pageState} onFilterChange={filterChange}> 
+                {children}
+            </ToolBar>
             <div className={styles.tableWrapper} ref={tableWrapRef}>
                 <Table className={styles.table} size="small"
                     dataSource={datas}
