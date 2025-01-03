@@ -73,7 +73,12 @@ export enum PageStateEnum {
     instrument = 'InstrumentListState',
 
     /**
-     * 行情
+     * 主力合约列表
+     */
+    forceInstrumentList = 'ForceInstrumentList',
+
+    /**
+     * 合约行情
      */
     market = 'MarketListState',
     

@@ -115,6 +115,7 @@ request.interceptors.request.use((url, options) => {
             Authorization: `Bearer ${token}`,
         };
     }
+    console.log(config);
     return config;
 }, { global: false });
 

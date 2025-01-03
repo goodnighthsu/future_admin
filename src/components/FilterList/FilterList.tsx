@@ -61,7 +61,7 @@ const FilterList = forwardRef(<RecordType,>(props: IFilterList<RecordType>, ref:
     const [datas, setDatas] = useState<RecordType[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
-    const [talbleContentHeight, setTableContentHeight] = useState<number>(0);
+    const [tableContentHeight, setTableContentHeight] = useState<number>(0);
     const tableWrapRef = useRef<HTMLDivElement | null>(null);
 
     // methods
@@ -158,7 +158,7 @@ const FilterList = forwardRef(<RecordType,>(props: IFilterList<RecordType>, ref:
                     rowKey={'id'}
                     bordered
                     pagination={false}
-                    scroll={{ y: talbleContentHeight, x: 'max-content' }}
+                    scroll={{ y: tableContentHeight, x: 'max-content' }}
                     loading={{ delay: 300, spinning: loading }}
                     onChange={tableChange}
                 />

@@ -63,6 +63,7 @@
         "react-dev-inspector": "^1.7.0",
         "react-dom": "^18.2.0",
         "react-helmet-async": "^1.2.0",
+        "styled-components": "^6.1.13",
         "vanta": "^0.5.24"
     },
     "devDependencies": {

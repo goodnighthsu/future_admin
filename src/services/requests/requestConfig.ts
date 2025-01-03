@@ -1,5 +1,6 @@
 import { HistoryModel } from '@/models/models/HistoryModel';
 import request, { IResponse } from '@/utils/request';
+import Setting from '../../../config/Setting';
 
 export const requestConfig = {
     /**
@@ -8,7 +9,7 @@ export const requestConfig = {
      * @returns 交易日
      */
     tradingDays: async (year: number) => {
-        const response: IResponse<string[]> | undefined = await request('/ctpslave/market/tradingDays', {
+        const response: IResponse<string[]> | undefined = await request(`${Setting.ctp}/market/tradingDays`, {
             method: 'get',
             params: {
                 year: year
@@ -23,7 +24,7 @@ export const requestConfig = {
      * @returns 
      */
     tradingDaysUpdate: async (year: number, holiday: string) => {
-        const response = await request('/ctpslave/market/tradingDays', {
+        const response = await request(`${Setting.ctp}/market/tradingDays`, {
             method: 'post',
             params: {
                 year: year,
@@ -37,7 +38,7 @@ export const requestConfig = {
      * 返回行情历史记录状态
      */
     history: async () => {
-        const response: IResponse<HistoryModel[]> | undefined = await request('/ctpslave/config/history');
+        const response: IResponse<HistoryModel[]> | undefined = await request(`${Setting.ctp}/config/history`);
         return response?.data;
     }
 }

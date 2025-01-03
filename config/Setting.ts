@@ -8,9 +8,24 @@ const server = () => {
     }
 }
 
+/**
+ * ctp微服务
+ * @returns 
+ */
+const ctp = () => {
+    if (process.env.NODE_ENV === 'development') {
+        return "/ctpdev";
+    } 
+
+    return "/ctpslave";
+}
+
 const Setting = {
     server: server(),
+    ctp: ctp(),
     defaultPageSize: 50
 }
+
+
 
 export default Setting
