@@ -105,7 +105,7 @@ request.interceptors.request.use((url, options) => {
     const token = App.instance().currentUser?.token;
 
     const config = {
-        url: `${Setting.server}${url}`,
+        url: `${Setting().server}${url}`,
         options: { ...options, interceptor: true },
     };
 

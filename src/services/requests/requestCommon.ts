@@ -14,7 +14,7 @@ export const requestCommon = {
     },
 
     ctpList: async<T> (param: IRequestParam): Promise<IPagingResponse<T> | undefined> => {
-        const response: IPagingResponse<T> = await request(`${Setting.ctp}/common`, {
+        const response: IPagingResponse<T> = await request(`${Setting().ctp}/common`, {
             method: 'get',
             params: {
                 query: JSON.stringify(param)

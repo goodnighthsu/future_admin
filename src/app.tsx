@@ -14,6 +14,7 @@ import { App, PageStateEnum } from '@/models/AppState';
 import { isDev, localUserState } from './utils/utils';
 import { useModel } from "@umijs/max";
 import { IToolBarState } from './models/models/ToolBarState';
+import StompClient from './services/StompClient';
 
 const loginPath = '/user/login';
 
@@ -26,9 +27,9 @@ export async function getInitialState(): Promise<{
     loading?: boolean;
 }> {
     if (window.location.pathname !== loginPath) {
-        const currestUser = await App.initLocalUser();
+        const currentUser = await App.initLocalUser();
         return {
-            currentUser: currestUser,
+            currentUser: currentUser,
             settings: defaultSettings,
         };
     }
@@ -141,6 +142,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
             // if (initialState?.loading) return <PageLoading />;
             return (
                 <>
+                    {/* stomp client组件，可以优化到上层 */}
+                    <StompClient />
                     {children}
                     {!props.location?.pathname?.includes('/login') && (
                         <SettingDrawer

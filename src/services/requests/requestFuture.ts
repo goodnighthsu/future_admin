@@ -21,7 +21,7 @@ export const requestFuture = {
         param: IRequestParam
     ): Promise<IPagingResponse<InstrumentModel> | undefined> => {
         const response: IResponse<InstrumentModel[]> | undefined = await request(
-            `${Setting.ctp}/market/instruments`,
+            `${Setting().ctp}/market/instruments`,
             {
                 method: 'get',
                 params: param,
@@ -49,7 +49,7 @@ export const requestFuture = {
      */
     instruments: async (tradingDay?: string) => {
         const response: IResponse<string[]> | undefined = await request(
-            `${Setting.ctp}/market/instruments/all`,
+            `${Setting().ctp}/market/instruments/all`,
             {
                 method: 'get',
                 params: {
@@ -68,7 +68,7 @@ export const requestFuture = {
      * @returns
      */
     subscribe: async (insturments: string[]) => {
-        const response: IResponse<string[]> | undefined = await request(`${Setting.ctp}/trade/subscribe`, {
+        const response: IResponse<string[]> | undefined = await request(`${Setting().ctp}/trade/subscribe`, {
             method: 'put',
             data: insturments,
         });
@@ -82,7 +82,7 @@ export const requestFuture = {
      */
     unsubscribe: async (insturments: string[]) => {
         const response: IResponse<string[]> | undefined = await request(
-            `${Setting.ctp}/instrument/unsubscribe`,
+            `${Setting().ctp}/instrument/unsubscribe`,
             {
                 method: 'put',
                 data: insturments,
@@ -115,7 +115,7 @@ export const requestFuture = {
             return;
         }
         //
-        const response: IResponse<any> | undefined = await request(`${Setting.ctp}/market/query`, {
+        const response: IResponse<any> | undefined = await request(`${Setting().ctp}/market/query`, {
             method: 'get',
             params: {
                 instrument: instrument.instrumentID,
@@ -241,7 +241,7 @@ export const requestFuture = {
      * 获取合约详细信息
      */
     instrumentInfo: async (instrumentId: string, abort?: AbortController) => {
-        const response: IResponse<InstrumentModel> | undefined = await request(`${Setting.ctp}/market/instrument/info`,
+        const response: IResponse<InstrumentModel> | undefined = await request(`${Setting().ctp}/market/instrument/info`,
             {
                 method: 'get',
                 params: {
@@ -262,7 +262,7 @@ export const requestFuture = {
      * @returns 
      */
     period: async (instrument: string, interval: number, tradingDay: string) => {
-        const response: IResponse<TradingModel[]> | undefined = await request(`${Setting.ctp}/market/instrument/period`,
+        const response: IResponse<TradingModel[]> | undefined = await request(`${Setting().ctp}/market/instrument/period`,
             {
                 method: 'get',
                 params: {

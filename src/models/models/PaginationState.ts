@@ -32,7 +32,7 @@ export interface IPaginationState {
  */
 const PaginationState = (): IPaginationState => {    
     const [page, setPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(Setting.defaultPageSize);
+    const [pageSize, setPageSize] = useState<number>(Setting().defaultPageSize);
     const [total] = useState<number>(0);
 
     const updatePagination = useCallback((_page: number, _pageSize: number) => {

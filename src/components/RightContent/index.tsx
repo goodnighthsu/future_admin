@@ -10,6 +10,7 @@ export type SiderTheme = 'light' | 'dark';
 
 const GlobalHeaderRight: React.FC = () => {
   const { initialState } = useModel('@@initialState');
+  const { stompConnected } = useModel('AppState');
 
   if (!initialState || !initialState.settings) {
     return null;
@@ -53,6 +54,9 @@ const GlobalHeaderRight: React.FC = () => {
         }}
       >
         <QuestionCircleOutlined />
+      </span>
+      <span>
+        mq: {stompConnected ? 'connected' : 'disconnected'}
       </span>
       <Avatar />
       <SelectLang className={styles.action} />
