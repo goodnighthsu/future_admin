@@ -5,9 +5,9 @@ const Setting = () => {
             ctp: "/ctpdev",
             stomp: {
                 url: "ws://192.168.1.201:15674/ws",
-                host: "root",
-                userName: "admin",
-                password: "admin",
+                host: "ctpdev",
+                userName: "dev",
+                password: "dev@ctp.com",
             },
             defaultPageSize: 50,
         }
@@ -18,9 +18,9 @@ const Setting = () => {
         ctp: "/ctpslave",
         stomp: {
             url: "ws://192.168.1.201:15674/ws",
-            host: "root",
-            userName: "admin",
-            password: "admin",
+            host: "ctpdev",
+            userName: "dev",
+            password: "dev@ctp.com",
         },
         defaultPageSize: 50,
     }

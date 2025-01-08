@@ -15,6 +15,7 @@ import { isDev, localUserState } from './utils/utils';
 import { useModel } from "@umijs/max";
 import { IToolBarState } from './models/models/ToolBarState';
 import StompClient from './services/StompClient';
+import { useEffect } from 'react';
 
 const loginPath = '/user/login';
 
@@ -140,10 +141,15 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         // 增加一个 loading 的状态
         childrenRender: (children, props) => {
             // if (initialState?.loading) return <PageLoading />;
+            const {stompInit} = useModel('AppState');
+
+            // 主页初始化stomp client
+            useEffect(() => {  
+                stompInit();
+            }, []);
+
             return (
                 <>
-                    {/* stomp client组件，可以优化到上层 */}
-                    <StompClient />
                     {children}
                     {!props.location?.pathname?.includes('/login') && (
                         <SettingDrawer

@@ -1,6 +1,6 @@
 import { requestSysUser } from "@/services/requests/requestSysUser";
 import { useModel } from "@umijs/max";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { SysUserModel } from "./models/SysUserModel";
 import Setting from "../../config/Setting";
 import { Client } from "@stomp/stompjs";
@@ -113,7 +113,7 @@ export default () => {
     /**
      * stomp client
      */
-    const [stompClient, setStompClient] = useState<Client | undefined>();
+    const stompClientRef = useRef<Client | undefined>();
     
     /**
      * stomp连接状态
@@ -154,6 +154,7 @@ export default () => {
      */
     const logout = () => {
         cleanLocalUser();
+        stompDisconnect();
     }
 
     /**
@@ -172,7 +173,7 @@ export default () => {
      * @returns 
      */
     const stompInit = () => {
-        if (stompClient) {
+        if (stompClientRef.current) {
             return;
         }
 
@@ -189,7 +190,7 @@ export default () => {
                 passcode: stompConfig.password,
             },
             onConnect: () => {
-                console.log("stomp connected");
+                console.log(`stomp ${stompConfig.url} connected`);
                 updateStompConnected(true);
                 client.subscribe(
                     '/exchange/testExchange/simu.*.*', 
@@ -211,8 +212,20 @@ export default () => {
             }
         });
         
+        stompClientRef.current = client;
         client.activate();
-        setStompClient(client);
+    }
+
+    /**
+     * 断开stomp连接
+     */
+    const stompDisconnect = () => {
+        if (!stompClientRef.current) {
+            return;
+        }
+        stompClientRef.current.deactivate();
+        updateStompConnected(false);
+        stompClientRef.current = undefined;
     }
 
     return {
